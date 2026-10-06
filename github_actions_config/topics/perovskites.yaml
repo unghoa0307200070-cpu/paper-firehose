@@ -1,80 +1,55 @@
-name: "Perovskites"
-description: "Perovskite solar cells, photoelectrochemistry, etc"
+name: "Pharmaceutical Process Vision"
+description: "药物制剂过程视觉监测、颗粒与泡沫测量，以及高温高湿环境下的可靠成像"
 
-# Which feeds to process for this topic
+# 先使用原配置中已有的来源；下一步补充专业期刊
 feeds:
-  - "cond-mat"
   - "nature"
   - "science"
-  - "nat-mat"
-  - "nat-nanotech"
-  - "nat-phys"
   - "nat-chem"
-  - "nat-ener"
-  - "nat-catal"
   - "nat-chem-eng"
-  - "nat-rev-phys"
   - "pnas"
-  - "joule"
-  - "prb"
-  - "prl"
-  - "prx"
-  - "pr_res"
-  - "nano-lett"
-  - "acs-nano"
-  - "acs-en-lett"
-  - "en-env-sci"
   - "science-adv"
   - "sci-rep"
   - "nat-comm"
-  - "comm-phys"
-  - "comm-mater"
-  - "scipost"
   - "small"
   - "adv-mater"
   - "adv-sci"
   - "adv-func-mater"
-  - "adv-phys-res"
   - "national-sci-rev"
-  - "npj-2d-mater"
-  - "npj-comp-mater"
-  - "npj-qmat"
 
-# Regex filter
+# 初步筛选：覆盖直接相关研究和可借鉴的方法
 filter:
-  pattern: '(perovskit.*photoelec.*)|\
-            (perovskit.*photocatho.*)|\
-            (perovskit.*photoano.*)|\
-            (organi.*photoelec.*)|\
-            (solar.*water.*splitt.*)|\
-            (photoelectrochem.*water.*splitt.*)|\
-            (photoelectrochem.*biom.*oxid.*)|\
-            (photoelectrochem.*valu.*add.*)|\
-            (perovsk.*sola.*cell)|\
-            (organi.*sola.*cell)'
+  pattern: '(process analytical technolog|machine vision|visual process monitor|image.based.*monitor|in.situ.*imag|in.line.*imag|on.line.*imag|particle.*(siz|shape|morpholog|segment|track)|pellet.*(siz|shape|coat|imag|monitor)|granulat.*(imag|vision|monitor|control)|foam.*(detect|monitor|imag|control)|bubble.*(detect|segment|track|imag|measur)|antifog|anti.fog|anti.condens|optical window|condens.*(coat|optical|window|surface)|high.temperature.*(camera|imag|optical)|sensor fusion|soft sensor)'
   fields: ["title", "summary"]
 
-# Ranking configuration
-ranking: 
-  query: >   # Natural-language ranking query used for sentence-transformers similarity
-    Perovskites, solar cells, photoelectrochemistry, solar water splitting, solar fuels
+# 在初筛结果中，优先排列与项目相关的论文
+ranking:
+  query: >
+    New research methods for pharmaceutical formulation manufacturing
+    and process analytical technology. Machine vision and video analysis
+    for in-line process monitoring, bubbles, foam, liquid surfaces,
+    pellet and particle size distributions, shape, agglomeration,
+    granulation, coating thickness, process state changes and endpoint
+    detection. Reliable optical imaging in hot and humid environments,
+    optical window antifogging and condensation prevention.
+    Transferable methods from food processing, fermentation,
+    chemical engineering and materials science are also relevant.
 
-  # Optional additional negative phrases to downweight (list may be empty)
-  negative_queries: [erratum, correction, reply, corrigendum]
+  negative_queries:
+    - "erratum"
+    - "correction"
+    - "reply"
+    - "corrigendum"
 
-  # Preferred authors. Names in this list get a ranking boost. Order: First name (or initial), Last name.
-  preferred_authors: [Matyas Daboczi]
-  priority_author_boost: 0.2
-
-  # Sentence-Transformers model used for ranking (can be overridden per topic)
+  preferred_authors: []
+  priority_author_boost: 0.0
   model: "all-MiniLM-L6-v2"
 
-# Abstract fetch configuration
 abstract_fetch:
   enabled: true
-  rank_threshold: 0.2 # this overrides the global rank_threshold in config.yaml. Should be smaller than score_cutoff
+  rank_threshold: 0.2
 
-# Paper-QA configuration (REQUIRED)
+# 保留项目要求的结构；基础网页版本稍后停用 AI 总结步骤
 paperqa:
   download_rank_threshold: 0.3
   rps: 0.3
@@ -83,23 +58,22 @@ paperqa:
   summary_llm: "gpt-4o-mini"
 
   prompt: |
-    You are a domain expert on perovskite solar cells and photoelectrochemistry.
-    Emphasize entries that materially advance stability, efficiency, interface physics/chemistry,
-    and catalysis mechanisms. Prefer clear methodological advances and results with high potential impact.
-    Be concise and expert-focused. Keep text concise and information-dense.
-    Avoid using superlatives and other over-the-top language.
-    CRITICAL: Return ONLY valid JSON with the exact structure specified.
-    No markdown formatting, no explanations, no text before or after the JSON object.
-    Required JSON structure:
+    Assess this paper for pharmaceutical process monitoring,
+    machine vision, particle and foam measurement, or reliable
+    imaging in hot and humid environments.
+    Explain the method, experimental conditions, and potential
+    relevance to practical equipment.
+    Distinguish demonstrated results from possible applications.
+    Write the JSON values in simplified Chinese.
+    Return ONLY valid JSON with this exact structure:
     {
-      "summary": "Brief technical summary of the paper",
-      "topical_relevance": "Assessment of relevance to: {ranking_query}, in one sentence",
-      "novelty_impact": "Evaluation of novelty and potential impact"
+      "summary": "核心方法及主要实验结果",
+      "topical_relevance": "与研究方向 {ranking_query} 的联系及适用条件",
+      "novelty_impact": "方法创新、潜在用途及局限"
     }
 
-# Output configuration
 output:
-  filename: "results_perovskites.html"
-  filename_ranked: "results_perovskites_ranked.html"
-  filename_summary: "results_perovskites_summary.html"
-  archive: true # archive the output file to the "matched_entries_history.db" database
+  filename: "results_pharma_vision.html"
+  filename_ranked: "results_pharma_vision_ranked.html"
+  filename_summary: "results_pharma_vision_summary.html"
+  archive: true
