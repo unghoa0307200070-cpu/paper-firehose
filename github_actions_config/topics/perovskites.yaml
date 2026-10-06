@@ -3,6 +3,12 @@ description: "药物制剂过程视觉监测、颗粒与泡沫测量，以及高
 
 # 先使用原配置中已有的来源；下一步补充专业期刊
 feeds:
+  - "arxiv-cv"
+  - "arxiv-imaging"
+  - "arxiv-fluids"
+  - "pharmaceutics"
+  - "ij-pharmaceutics"
+  - "powder-technology"
   - "nature"
   - "science"
   - "nat-chem"
