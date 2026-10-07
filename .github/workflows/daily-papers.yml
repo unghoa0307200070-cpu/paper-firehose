@@ -1,4 +1,4 @@
-name: Build and Deploy HTML
+name: Daily Pharmaceutical Vision Papers
 
 on:
   workflow_dispatch:
@@ -10,7 +10,7 @@ on:
   push:
     branches: [main]
     paths:
-      - '.github/workflows/pages.yml'
+      - '.github/workflows/daily-papers.yml'
       - 'github_actions_config/**'
       - 'scripts/**'
   schedule:
