@@ -182,7 +182,7 @@ jobs:
           python scripts/prepare_feeds.py
           paper-firehose --config "$CONFIG_PATH" filter
           paper-firehose --config "$CONFIG_PATH" rank
-          paper-firehose --config "$CONFIG_PATH" abstracts --max-per-topic 30
+          paper-firehose --config "$CONFIG_PATH" abstracts --limit 30
 
           echo "Step 4: Abstract summarization skipped"
 
