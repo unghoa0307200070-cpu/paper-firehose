@@ -69,7 +69,7 @@ def run(
     abs_defaults = (defaults.get('abstracts') or {})
 
     # Resolve contact email: CLI arg -> MAILTO env -> config.defaults.abstracts.mailto -> fallback
-    mailto = mailto or os.environ.get("MAILTO") or abs_defaults.get('mailto') or "nemesp@gmail.com"
+    mailto = mailto or os.environ.get("MAILTO") or abs_defaults.get('mailto')
 
     # RPS from config if provided
     if rps == 1.0:  # only use config if user didn't override

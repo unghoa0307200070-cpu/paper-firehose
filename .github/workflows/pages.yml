@@ -12,7 +12,7 @@ on:
     paths:
       - '.github/workflows/pages.yml'
       - 'github_actions_config/**'
-      - 'scripts/verify_digest.py'
+      - 'scripts/**'
   schedule:
     # Beijing time 09:00 daily (GitHub schedules may be delayed)
     - cron: '0 1 * * *'
@@ -29,6 +29,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 35
     env:
       PAPER_FIREHOSE_DATA_DIR: ${{ github.workspace }}/.paper_firehose
       CONFIG_PATH: ${{ github.workspace }}/.paper_firehose/config/config.yaml
@@ -178,9 +179,10 @@ jobs:
           ls -la "$PAPER_FIREHOSE_DATA_DIR" || true
 
           paper-firehose --config "$CONFIG_PATH" config validate
+          python scripts/prepare_feeds.py
           paper-firehose --config "$CONFIG_PATH" filter
           paper-firehose --config "$CONFIG_PATH" rank
-          paper-firehose --config "$CONFIG_PATH" abstracts
+          paper-firehose --config "$CONFIG_PATH" abstracts --max-per-topic 30
 
           echo "Step 4: Abstract summarization skipped"
 
@@ -335,7 +337,7 @@ jobs:
 
           # Make the project digest the website home page.
           test -f site/results_pharma_vision_ranked.html
-          cp site/results_pharma_vision_ranked.html site/index.html
+          python scripts/build_digest.py
           touch site/.nojekyll
 
       - uses: actions/upload-pages-artifact@v3
