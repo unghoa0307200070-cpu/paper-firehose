@@ -6,7 +6,7 @@ Initial minimal version
 
 - Read per-topic ranking config (query, model).
 - Fetch entries with ``status='filtered'`` for the topic(s).
-- Compute cosine similarity (Sentence-Transformers) between query and title.
+- Compute cosine similarity (Sentence-Transformers) between query and title plus available abstract/summary.
 - Write scores to ``rank_score`` (no status change).
 
 Notes
@@ -33,14 +33,17 @@ from ..core.command_utils import resolve_topics
 from ..core.text_utils import strip_accents, normalize_name, parse_name_parts, names_match
 from ..core.model_manager import ensure_local_model
 from ..processors.st_ranker import STRanker
+from ..processors.relevance import RelevancePolicy, plain_text, evidence_text
 
 logger = logging.getLogger(__name__)
 
 
 def _build_entry_text(entry: Dict[str, Any]) -> str:
-    """Return the text to be ranked for an entry (title-only for now)."""
-    # Keep minimal as requested; can switch to title+summary later
-    return (entry.get("title") or "").strip()
+    """Use title and the available abstract/feed summary for semantic ranking."""
+    title = plain_text(entry.get("title"))
+    summary = evidence_text(entry.get("abstract") or entry.get("summary"))
+    return f"{title}. {summary}"
+
 
 
 def _entry_has_preferred_author(entry: Dict[str, Any], preferred_authors: List[str]) -> bool:
@@ -172,6 +175,7 @@ def run(
             )
             scores = adjusted
 
+        policy = RelevancePolicy(tcfg.get("relevance"))
         # Write scores with boosts
         updated = 0
         boosted_auth = 0
@@ -180,6 +184,9 @@ def run(
         for eid, tname, score in scores:
             s = float(score)
             entry = entry_by_key.get((eid, tname)) or {}
+            relevance = policy.evaluate(entry)
+            if relevance:
+                s += relevance["boost"]
             # Preferred author boost
             if preferred_authors and author_boost > 0 and _entry_has_preferred_author(entry, preferred_authors):
                 s += author_boost
@@ -239,3 +246,4 @@ def run(
             "total_ranked": sum(t["ranked"] for t in topic_results.values()),
         }
     return None
+

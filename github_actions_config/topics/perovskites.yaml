@@ -1,85 +1,165 @@
-name: "Pharmaceutical Process Vision"
-description: "药物制剂过程视觉监测、颗粒与泡沫测量，以及高温高湿环境下的可靠成像"
-
-# 先使用原配置中已有的来源；下一步补充专业期刊
+# 多模态 PAT 个性化规则；通用方法限额避免挤占过程检测
+name: Multimodal Pharmaceutical PAT
+description: 多模态制药过程检测：机器视觉、光谱、振动／声学、传感器融合、软测量与过程质量监测
 feeds:
-  - "arxiv-cv"
-  - "arxiv-imaging"
-  - "arxiv-fluids"
-  - "pharmaceutics"
-  - "ij-pharmaceutics"
-  - "powder-technology"
-  - "nature"
-  - "science"
-  - "nat-chem"
-  - "nat-chem-eng"
-  - "pnas"
-  - "science-adv"
-  - "sci-rep"
-  - "nat-comm"
-  - "small"
-  - "adv-mater"
-  - "adv-sci"
-  - "adv-func-mater"
-  - "national-sci-rev"
-
-# 初步筛选：覆盖直接相关研究和可借鉴的方法
+- arxiv-cv
+- arxiv-imaging
+- ij-pharmaceutics
+- powder-technology
+- nat-chem-eng
+- sci-rep
+- nat-comm
+- adv-sci
+- chemometrics
+- pharm-analysis
+- measurement
+- chemical-eng-science
+- sensors-actuators-b
+- analytica-chimica-acta
+- control-eng-practice
+- mechanical-signal
+- food-control
+- arxiv-signal
+- arxiv-instrumentation
 filter:
-  pattern: '(process analytical technolog|machine vision|visual process monitor|image.based.*monitor|in.situ.*imag|in.line.*imag|on.line.*imag|particle.*(siz|shape|morpholog|segment|track)|pellet.*(siz|shape|coat|imag|monitor)|granulat.*(imag|vision|monitor|control)|foam.*(detect|monitor|imag|control)|bubble.*(detect|segment|track|imag|measur)|antifog|anti.fog|anti.condens|optical window|condens.*(coat|optical|window|surface)|high.temperature.*(camera|imag|optical)|sensor fusion|soft sensor)'
-  fields: ["title", "summary"]
-
-# 在初筛结果中，优先排列与项目相关的论文
+  pattern: \b(raman|nir|ftir|nmr|uv.vis|libs)\b|spectroscop\w*|hyperspectral|near.infrared|mid.infrared|spectral
+    imaging|machine vision|computer vision|image.based|video.based|camera|image analys\w*|image processing|visual
+    inspect\w*|optical imaging|image segment\w*|\bimaging\b|vibration\w*|acoustic emission|acoustic sensor\w*|ultrason\w*|acceleromet\w*|sound
+    signal\w*|multi.modal|multi.sensor|sensor fusion|data fusion|multi.block|multi.view|multi.source|spectral fusion|chemometric\w*|soft.sensor\w*|dielectric
+    spectroscop\w*|electrical impedance|focused beam reflectance|\bfbrm\b|spatial filter velocimetr\w*|process analytical
+    technolog\w*|anti.fog\w*|antifog\w*|anti.condens\w*|condensation preven\w*|dew preven\w*|high.temperature|high.humidity|humid
+    environment|condens\w*
+  fields:
+  - title
+  - summary
 ranking:
-  query: >
-    New research methods for pharmaceutical formulation manufacturing
-    and process analytical technology. Machine vision and video analysis
-    for in-line process monitoring, bubbles, foam, liquid surfaces,
-    pellet and particle size distributions, shape, agglomeration,
-    granulation, coating thickness, process state changes and endpoint
-    detection. Reliable optical imaging in hot and humid environments,
-    optical window antifogging and condensation prevention.
-    Transferable methods from food processing, fermentation,
-    chemical engineering and materials science are also relevant.
-
+  query: Pharmaceutical process analytical technology and multimodal quality monitoring during formulation manufacturing.
+    In-line Raman and near-infrared spectroscopy, hyperspectral imaging, machine vision, acoustic and vibration
+    sensing. Sensor data fusion and chemometrics for granulation, pellet and particle size, powder blending, coating,
+    drying, bubbles and foam, moisture, content uniformity and process endpoints. Transferable industrial and food
+    process measurement methods.
   negative_queries:
-    - "erratum"
-    - "correction"
-    - "reply"
-    - "corrigendum"
-
+  - erratum
+  - corrigendum
+  - photothermal therapy
+  - drug delivery
+  - clinical diagnosis
+  - plant disease
+  - numerical simulation of droplets
   preferred_authors: []
   priority_author_boost: 0.0
-  model: "all-MiniLM-L6-v2"
-
+  model: all-MiniLM-L6-v2
 abstract_fetch:
   enabled: true
-  rank_threshold: 0.2
-
-# 保留项目要求的结构；基础网页版本稍后停用 AI 总结步骤
+  rank_threshold: 0.1
 paperqa:
   download_rank_threshold: 0.3
   rps: 0.3
   max_retries: 3
-  llm: "gpt-4o-mini"
-  summary_llm: "gpt-4o-mini"
-
-  prompt: |
-    Assess this paper for pharmaceutical process monitoring,
-    machine vision, particle and foam measurement, or reliable
-    imaging in hot and humid environments.
-    Explain the method, experimental conditions, and potential
-    relevance to practical equipment.
-    Distinguish demonstrated results from possible applications.
-    Write the JSON values in simplified Chinese.
-    Return ONLY valid JSON with this exact structure:
-    {
-      "summary": "核心方法及主要实验结果",
-      "topical_relevance": "与研究方向 {ranking_query} 的联系及适用条件",
-      "novelty_impact": "方法创新、潜在用途及局限"
-    }
-
+  llm: gpt-4o-mini
+  summary_llm: gpt-4o-mini
+  prompt: Evaluate experimental methods for multimodal pharmaceutical process analytical technology, spectroscopy,
+    machine vision, vibration/acoustic sensing and sensor fusion. Distinguish manufacturing quality monitoring from
+    medical diagnosis. Return valid JSON with summary, topical_relevance and novelty_impact fields.
 output:
-  filename: "results_pharma_vision.html"
-  filename_ranked: "results_pharma_vision_ranked.html"
-  filename_summary: "results_pharma_vision_summary.html"
+  filename: results_pharma_vision.html
+  filename_ranked: results_pharma_vision_ranked.html
+  filename_summary: results_pharma_vision_summary.html
   archive: true
+relevance:
+  exclude_title_pattern: \b(erratum|corrigendum|retraction)\b|photothermal therap\w*|photodynamic therap\w*|magneto.?phototherap\w*|drug
+    delivery|tumou?r (?:imag\w*|therap\w*|diagnos\w*)|cancer (?:imag\w*|therap\w*|diagnos\w*)|septic arthritis|plant
+    disease|crop disease|leaf disease|autonomous driv\w*|self.driving|person re.identification|human action recognition|relighting|novel.view
+    synth\w*|text.to.image|image generation|bacterial identification|plant phenotyp\w*|\bmg.vqa\b|visual question
+    answering|\bexhaled\b|human plasma|clinical diagnosis
+  modalities:
+    视觉: machine vision|computer vision|image.based|video.based|camera|image analys\w*|image processing|visual inspect\w*|optical
+      imaging|image segment\w*|\bimaging\b
+    光谱: \b(raman|nir|ftir|nmr|uv.vis|libs)\b|spectroscop\w*|hyperspectral|near.infrared|mid.infrared|spectral imaging
+    振动／声学: vibration\w*|acoustic emission|acoustic sensor\w*|ultrason\w*|acceleromet\w*|sound signal\w*
+    融合: multi.modal|multi.sensor|sensor fusion|data fusion|multi.block|multi.view|multi.source|spectral fusion
+  routes:
+  - label: 制药／制剂过程检测
+    priority: 4
+    boost: 0.2
+    all_patterns:
+    - pharmaceut\w*|traditional chinese medicin\w*|herbal|astragali radix|gelatin|drug product\w*|drug manufactur\w*|dosage
+      form\w*|\btablet\w*\b|\bpellet\w*\b|granulat\w*|fluidi[sz]ed.bed|powder blend\w*|\bejiao\b|gelatin manufactur\w*|crystalli[sz]ation|\bextrusion\b
+    - \b(raman|nir|ftir|nmr|uv.vis|libs)\b|spectroscop\w*|hyperspectral|near.infrared|mid.infrared|spectral imaging|machine
+      vision|computer vision|image.based|video.based|camera|image analys\w*|image processing|visual inspect\w*|optical
+      imaging|image segment\w*|\bimaging\b|vibration\w*|acoustic emission|acoustic sensor\w*|ultrason\w*|acceleromet\w*|sound
+      signal\w*|multi.modal|multi.sensor|sensor fusion|data fusion|multi.block|multi.view|multi.source|spectral
+      fusion|chemometric\w*|soft.sensor\w*|dielectric spectroscop\w*|electrical impedance|focused beam reflectance|\bfbrm\b|spatial
+      filter velocimetr\w*
+    - monitor\w*|in.line|on.line|inline|online|in.situ|real.time|non.destructive|quality|endpoint|end.point|moisture|concentration|content
+      uniformity|particle siz\w*|size distribution|classif\w*|quantif\w*|identif\w*|detect\w*|measur\w*|estim\w*|predict\w*|control
+  - label: 过程分析技术 PAT
+    priority: 4
+    boost: 0.2
+    all_patterns:
+    - process analytical technolog\w*
+    - \b(raman|nir|ftir|nmr|uv.vis|libs)\b|spectroscop\w*|hyperspectral|near.infrared|mid.infrared|spectral imaging|machine
+      vision|computer vision|image.based|video.based|camera|image analys\w*|image processing|visual inspect\w*|optical
+      imaging|image segment\w*|\bimaging\b|vibration\w*|acoustic emission|acoustic sensor\w*|ultrason\w*|acceleromet\w*|sound
+      signal\w*|multi.modal|multi.sensor|sensor fusion|data fusion|multi.block|multi.view|multi.source|spectral
+      fusion|chemometric\w*|soft.sensor\w*|dielectric spectroscop\w*|electrical impedance|focused beam reflectance|\bfbrm\b|spatial
+      filter velocimetr\w*|monitor\w*|in.line|on.line|inline|online|in.situ|real.time|non.destructive|quality|endpoint|end.point|moisture|concentration|content
+      uniformity|particle siz\w*|size distribution|classif\w*|quantif\w*|identif\w*|detect\w*|measur\w*|estim\w*|predict\w*|control
+  - label: 过程多模态／多传感器融合
+    priority: 3
+    boost: 0.12
+    all_patterns:
+    - food|\btea\b|\bmilk\b|\byogurt\b|\bstarch\b|\bsugar\b|dairy|ferment\w*|bioreactor\w*|chemical process\w*|industrial|manufactur\w*|production
+      (?:process|line|monitoring|quality)|process monitor\w*|process control|powder|\bmixing\b|\bdrying\b|\bbubble\w*\b|\bfoam\w*\b
+    - multi.modal|multi.sensor|sensor fusion|data fusion|multi.block|multi.view|multi.source|spectral fusion
+    - \b(raman|nir|ftir|nmr|uv.vis|libs)\b|spectroscop\w*|hyperspectral|near.infrared|mid.infrared|spectral imaging|machine
+      vision|computer vision|image.based|video.based|camera|image analys\w*|image processing|visual inspect\w*|optical
+      imaging|image segment\w*|\bimaging\b|vibration\w*|acoustic emission|acoustic sensor\w*|ultrason\w*|acceleromet\w*|sound
+      signal\w*|multi.modal|multi.sensor|sensor fusion|data fusion|multi.block|multi.view|multi.source|spectral
+      fusion|chemometric\w*|soft.sensor\w*|dielectric spectroscop\w*|electrical impedance|focused beam reflectance|\bfbrm\b|spatial
+      filter velocimetr\w*
+    - monitor\w*|in.line|on.line|inline|online|in.situ|real.time|non.destructive|quality|endpoint|end.point|moisture|concentration|content
+      uniformity|particle siz\w*|size distribution|classif\w*|quantif\w*|identif\w*|detect\w*|measur\w*|estim\w*|predict\w*|control
+  - label: 可迁移的过程检测方法
+    priority: 2
+    boost: 0.06
+    all_patterns:
+    - food|\btea\b|\bmilk\b|\byogurt\b|\bstarch\b|\bsugar\b|dairy|ferment\w*|bioreactor\w*|chemical process\w*|industrial|manufactur\w*|production
+      (?:process|line|monitoring|quality)|process monitor\w*|process control|powder|\bmixing\b|\bdrying\b|\bbubble\w*\b|\bfoam\w*\b
+    - \b(raman|nir|ftir|nmr|uv.vis|libs)\b|spectroscop\w*|hyperspectral|near.infrared|mid.infrared|spectral imaging|machine
+      vision|computer vision|image.based|video.based|camera|image analys\w*|image processing|visual inspect\w*|optical
+      imaging|image segment\w*|\bimaging\b|vibration\w*|acoustic emission|acoustic sensor\w*|ultrason\w*|acceleromet\w*|sound
+      signal\w*|multi.modal|multi.sensor|sensor fusion|data fusion|multi.block|multi.view|multi.source|spectral
+      fusion|chemometric\w*|soft.sensor\w*|dielectric spectroscop\w*|electrical impedance|focused beam reflectance|\bfbrm\b|spatial
+      filter velocimetr\w*
+    - monitor\w*|in.line|on.line|inline|online|in.situ|real.time|non.destructive|quality|endpoint|end.point|moisture|concentration|content
+      uniformity|particle siz\w*|size distribution|classif\w*|quantif\w*|identif\w*|detect\w*|measur\w*|estim\w*|predict\w*|control
+  - label: 光谱建模／化学计量学方法
+    priority: 1
+    boost: 0.02
+    all_patterns:
+    - \b(raman|nir|ftir|nmr|uv.vis|libs)\b|spectroscop\w*|hyperspectral|near.infrared|mid.infrared|spectral imaging
+    - chemometric\w*|calibrat\w*|domain adapt\w*|transfer learn\w*|model transfer|multi.variate|partial least squares|robust\w*|interpretab\w*|multi.block|data
+      fusion|spectral fusion
+  - label: 成像／光学设备环境适应
+    priority: 1
+    boost: 0.02
+    all_patterns:
+    - anti.fog\w*|antifog\w*|anti.condens\w*|condensation preven\w*|dew preven\w*|high.temperature|high.humidity|humid
+      environment|condens\w*
+    - optical window\w*|\blens\w*\b|\bcamera\w*\b|imaging|spectromet\w*|optical|transparent
+  - label: 可迁移的多模态状态检测
+    priority: 1
+    boost: 0.02
+    all_patterns:
+    - multi.modal|multi.sensor|sensor fusion|data fusion|multi.block|multi.view|multi.source|spectral fusion
+    - vibration\w*|acoustic emission|acoustic sensor\w*|ultrason\w*|acceleromet\w*|sound signal\w*|\b(raman|nir|ftir|nmr|uv.vis|libs)\b|spectroscop\w*|hyperspectral|near.infrared|mid.infrared|spectral
+      imaging
+    - condition monitor\w*|fault diagnos\w*|soft.sensor\w*|process monitor\w*|industrial
+    - monitor\w*|in.line|on.line|inline|online|in.situ|real.time|non.destructive|quality|endpoint|end.point|moisture|concentration|content
+      uniformity|particle siz\w*|size distribution|classif\w*|quantif\w*|identif\w*|detect\w*|measur\w*|estim\w*|predict\w*|control
+  display_limits:
+    1: 4
+    2: 5
+    3: 8
+    4: 15

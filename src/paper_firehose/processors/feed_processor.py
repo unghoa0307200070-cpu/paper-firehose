@@ -6,12 +6,16 @@ Fetches RSS feeds, applies regex filters, and manages entry storage.
 import feedparser
 import re
 import time
+import hashlib
+import json
+import sqlite3
 import datetime
 from typing import Dict, List, Any
 import logging
 
 from ..core.database import DatabaseManager
 from ..core.config import ConfigManager
+from .relevance import RelevancePolicy
 
 logger = logging.getLogger(__name__)
 
@@ -26,11 +30,29 @@ class FeedProcessor:
         """Bind database/config managers and derive the time window constraint."""
         self.db = db_manager
         self.config = config_manager
+        self._profiles = {}
         # Resolve time window from config (defaults.time_window_days)
         cfg = self.config.load_config()
         days = int((cfg.get('defaults') or {}).get('time_window_days', DEFAULT_TIME_WINDOW_DAYS))
         self.time_delta = datetime.timedelta(days=days)
     
+    def _profile_changed(self, topic_name):
+        """Reconsider available RSS papers once after a preference change."""
+        if topic_name not in self._profiles:
+            topic = self.config.load_topic_config(topic_name)
+            payload = {key: topic.get(key) for key in ("filter", "relevance", "ranking", "feeds")}
+            signature = hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
+            with sqlite3.connect(self.db.db_paths["all_feeds"]) as conn:
+                conn.execute("CREATE TABLE IF NOT EXISTS recommendation_profiles(topic TEXT PRIMARY KEY, signature TEXT)")
+                previous = conn.execute("SELECT signature FROM recommendation_profiles WHERE topic = ?", (topic_name,)).fetchone()
+            self._profiles[topic_name] = (signature, not previous or previous[0] != signature)
+        return self._profiles[topic_name][1]
+
+    def _save_profile(self, topic_name):
+        signature, _ = self._profiles[topic_name]
+        with sqlite3.connect(self.db.db_paths["all_feeds"]) as conn:
+            conn.execute("INSERT OR REPLACE INTO recommendation_profiles VALUES(?,?)", (topic_name, signature))
+
     def fetch_feeds(self, topic_name: str) -> Dict[str, List[Dict[str, Any]]]:
         """
         Fetch RSS feeds for a topic and return new entries.
@@ -39,6 +61,7 @@ class FeedProcessor:
             Dict mapping feed names to lists of new entries
         """
         topic_config = self.config.load_topic_config(topic_name)
+        reconsider = self._profile_changed(topic_name)
         feeds_to_process = topic_config['feeds']
         enabled_feeds = self.config.get_enabled_feeds()
         
@@ -92,7 +115,7 @@ class FeedProcessor:
                     
                     # Check if this is a new entry (by title)
                     title = entry.get('title', '').strip()
-                    if self.db.is_new_entry(title):
+                    if reconsider or self.db.is_new_entry(title):
                         new_entries.append(entry)
                         logger.debug(f"New entry found: {title[:50]}...")
                 
@@ -117,6 +140,7 @@ class FeedProcessor:
             List of entries that match the topic's regex filter
         """
         topic_config = self.config.load_topic_config(topic_name)
+        policy = RelevancePolicy(topic_config.get('relevance'))
         filter_config = topic_config['filter']
         
         pattern = filter_config['pattern']
@@ -145,7 +169,7 @@ class FeedProcessor:
                 
                 # Only include entries that match the regex pattern
                 # Priority status is preserved for future LLM ranking/summarization
-                if matches_regex:
+                if matches_regex and policy.evaluate(entry):
                     # Add metadata
                     entry['entry_id'] = entry_id
                     entry['feed_name'] = feed_display_name
@@ -166,6 +190,7 @@ class FeedProcessor:
                     logger.debug(f"Entry matched for topic '{topic_name}': {entry.get('title', 'No title')[:50]}... (priority: {is_priority_feed})")
         
         logger.info(f"Found {len(matched_entries)} entries matching filters for topic '{topic_name}'")
+        self._save_profile(topic_name)
         return matched_entries
     
     def _matches_pattern(self, entry: Dict[str, Any], regex: re.Pattern, fields: List[str]) -> bool:
@@ -208,4 +233,5 @@ class FeedProcessor:
         Returns the number of rows deleted.
         """
         return self.db.delete_all_feeds_older_than(self.time_delta.days)
+
 

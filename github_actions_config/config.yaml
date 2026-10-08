@@ -1,129 +1,93 @@
-# 药物制剂过程视觉监测：全局配置
-
+# 多模态 PAT：制药过程检测与可迁移测量方法
 database:
-  path: "papers.db"
-  all_feeds_path: "all_feed_entries.db"
-  history_path: "matched_entries_history.db"
-
+  path: papers.db
+  all_feeds_path: all_feed_entries.db
+  history_path: matched_entries_history.db
 feeds:
-  # 视觉、图像处理和气泡流体研究
   arxiv-cv:
-    name: "arXiv Computer Vision"
-    url: "https://rss.arxiv.org/rss/cs.CV"
+    name: arXiv Computer Vision
+    url: https://rss.arxiv.org/rss/cs.CV
     enabled: true
-
   arxiv-imaging:
-    name: "arXiv Image and Video Processing"
-    url: "https://rss.arxiv.org/rss/eess.IV"
+    name: arXiv Image and Video Processing
+    url: https://rss.arxiv.org/rss/eess.IV
     enabled: true
-
-  arxiv-fluids:
-    name: "arXiv Fluid Dynamics"
-    url: "https://rss.arxiv.org/rss/physics.flu-dyn"
-    enabled: true
-
-  # 制药与颗粒研究：首次运行检查来源可用性
-  pharmaceutics:
-    name: "Pharmaceutics"
-    url: "https://www.mdpi.com/rss/journal/pharmaceutics"
-    enabled: true
-
   ij-pharmaceutics:
-    name: "International Journal of Pharmaceutics"
-    url: "https://rss.sciencedirect.com/publication/science/03785173"
+    name: International Journal of Pharmaceutics
+    url: https://rss.sciencedirect.com/publication/science/03785173
     enabled: true
-
   powder-technology:
-    name: "Powder Technology"
-    url: "https://rss.sciencedirect.com/publication/science/00325910"
+    name: Powder Technology
+    url: https://rss.sciencedirect.com/publication/science/00325910
     enabled: true
-
-  # 综合、化工与材料研究
-  nature:
-    name: "Nature"
-    url: "https://www.nature.com/nature.rss"
-    enabled: true
-
-  science:
-    name: "Science"
-    url: "https://www.science.org/action/showFeed?type=axatoc&feed=rss&jc=science"
-    enabled: true
-
-  nat-chem:
-    name: "Nature Chemistry"
-    url: "https://www.nature.com/nchem.rss"
-    enabled: true
-
   nat-chem-eng:
-    name: "Nature Chemical Engineering"
-    url: "https://www.nature.com/natchemeng.rss"
+    name: Nature Chemical Engineering
+    url: https://www.nature.com/natchemeng.rss
     enabled: true
-
-  pnas:
-    name: "PNAS Physical Sciences"
-    url: "https://www.pnas.org/action/showFeed?type=searchTopic&taxonomyCode=topic&tagCode=phys-sci"
-    enabled: true
-
-  science-adv:
-    name: "Science Advances"
-    url: "https://www.science.org/action/showFeed?type=etoc&feed=rss&jc=sciadv"
-    enabled: true
-
   sci-rep:
-    name: "Scientific Reports"
-    url: "https://www.nature.com/srep.rss"
+    name: Scientific Reports
+    url: https://www.nature.com/srep.rss
     enabled: true
-
   nat-comm:
-    name: "Nature Communications"
-    url: "https://www.nature.com/ncomms.rss"
+    name: Nature Communications
+    url: https://www.nature.com/ncomms.rss
     enabled: true
-
-  small:
-    name: "Small"
-    url: "https://onlinelibrary.wiley.com/feed/16136829/most-recent"
-    enabled: true
-
-  adv-mater:
-    name: "Advanced Materials"
-    url: "https://onlinelibrary.wiley.com/feed/15214095/most-recent"
-    enabled: true
-
   adv-sci:
-    name: "Advanced Science"
-    url: "https://onlinelibrary.wiley.com/feed/21983844/most-recent"
+    name: Advanced Science
+    url: https://onlinelibrary.wiley.com/feed/21983844/most-recent
     enabled: true
-
-  adv-func-mater:
-    name: "Advanced Functional Materials"
-    url: "https://onlinelibrary.wiley.com/feed/16163028/most-recent"
+  chemometrics:
+    name: Chemometrics and Intelligent Laboratory Systems
+    url: https://rss.sciencedirect.com/publication/science/01697439
     enabled: true
-
-  national-sci-rev:
-    name: "National Science Review"
-    url: "https://academic.oup.com/rss/site_5332/advanceAccess_3198.xml"
+  pharm-analysis:
+    name: Journal of Pharmaceutical and Biomedical Analysis
+    url: https://rss.sciencedirect.com/publication/science/07317085
     enabled: true
-
-# 初期不按期刊额外加分，优先看内容相关性
+  measurement:
+    name: Measurement
+    url: https://rss.sciencedirect.com/publication/science/02632241
+    enabled: true
+  chemical-eng-science:
+    name: Chemical Engineering Science
+    url: https://rss.sciencedirect.com/publication/science/00092509
+    enabled: true
+  sensors-actuators-b:
+    name: 'Sensors and Actuators B: Chemical'
+    url: https://rss.sciencedirect.com/publication/science/09254005
+    enabled: true
+  analytica-chimica-acta:
+    name: Analytica Chimica Acta
+    url: https://rss.sciencedirect.com/publication/science/00032670
+    enabled: true
+  control-eng-practice:
+    name: Control Engineering Practice
+    url: https://rss.sciencedirect.com/publication/science/09670661
+    enabled: true
+  mechanical-signal:
+    name: Mechanical Systems and Signal Processing
+    url: https://rss.sciencedirect.com/publication/science/08883270
+    enabled: true
+  food-control:
+    name: Food Control
+    url: https://rss.sciencedirect.com/publication/science/09567135
+    enabled: true
+  arxiv-signal:
+    name: arXiv Signal Processing
+    url: https://rss.arxiv.org/rss/eess.SP
+    enabled: true
+  arxiv-instrumentation:
+    name: arXiv Instrumentation and Detectors
+    url: https://rss.arxiv.org/rss/physics.ins-det
+    enabled: true
 priority_journals: []
 priority_journal_boost: 0.0
-
 defaults:
-  # 数据库的条目保留窗口，不等同于严格发表日期筛选
   time_window_days: 30
-
-  # 每个主题展示的推荐数量
   top_n_per_topic: 15
-
-  # 获取摘要的相关性门槛
-  rank_threshold: 0.2
-
+  rank_threshold: 0.1
   ranking_negative_penalty: 0.25
-
   abstracts:
     rps: 1.0
     max_retries: 3
-    mailto: ""
-
-# 当前只做网页日报，不配置邮件发送
-# 下一步须在运行任务中停用 email 和 pqa_summary
+    mailto: ''

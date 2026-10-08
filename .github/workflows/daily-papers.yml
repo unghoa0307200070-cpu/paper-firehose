@@ -1,4 +1,4 @@
-name: Daily Pharmaceutical Vision Papers
+name: Daily Multimodal PAT Papers
 
 on:
   workflow_dispatch:
@@ -161,6 +161,9 @@ jobs:
           pip install -r requirements.txt
           pip install -e .
 
+      - name: Verify recommendation relevance
+        run: python -m unittest discover -s tests -p test_multimodal_relevance.py
+
       - name: Purge recent entries
         if: ${{ env.PURGE_RECENT == 'true' }}
         run: |
@@ -183,6 +186,8 @@ jobs:
           paper-firehose --config "$CONFIG_PATH" filter
           paper-firehose --config "$CONFIG_PATH" rank
           paper-firehose --config "$CONFIG_PATH" abstracts --limit 30
+          python scripts/review_candidates.py
+          paper-firehose --config "$CONFIG_PATH" rank
 
           echo "Step 4: Abstract summarization skipped"
 
@@ -332,12 +337,13 @@ jobs:
           cp history_viewer*.html site/ 2>/dev/null || true
 
           # Copy databases for history viewer
-          cp "$PAPER_FIREHOSE_DATA_DIR/matched_entries_history.db" site/ 2>/dev/null || true
+          cp "$PAPER_FIREHOSE_DATA_DIR/matched_entries_history.recent.db" site/matched_entries_history.db 2>/dev/null || true
           cp "$PAPER_FIREHOSE_DATA_DIR/matched_entries_history.recent.db" site/ 2>/dev/null || true
 
           # Make the project digest the website home page.
           test -f site/results_pharma_vision_ranked.html
           python scripts/build_digest.py
+          python scripts/review_candidates.py --site site
           touch site/.nojekyll
 
       - uses: actions/upload-pages-artifact@v3
