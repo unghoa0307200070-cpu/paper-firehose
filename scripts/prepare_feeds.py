@@ -11,13 +11,13 @@ import requests
 import yaml
 
 
-def europepmc_rss(value, days=30, get=requests.get):
+def europepmc_rss(value, days=180, get=requests.get):
     """Adapt bounded, date-filtered Europe PMC metadata to the RSS pipeline."""
     today = dt.datetime.now(dt.timezone.utc).date()
     since = today - dt.timedelta(days=days)
     query = f'({value["query"]}) AND FIRST_PDATE:[{since} TO {today}] sort_date:y'
     response = get(value['url'], params={'query':query, 'format':'json',
-                   'resultType':'core', 'pageSize':100}, timeout=(10,30))
+                   'resultType':'core', 'pageSize':1000}, timeout=(10,30))
     response.raise_for_status()
     result = response.json()
     if 'resultList' not in result or 'hitCount' not in result:
@@ -56,7 +56,7 @@ def main():
         try:
             is_search = value.get('kind') == 'europepmc'
             if is_search:
-                content, hits = europepmc_rss(value, int(cfg.get('defaults', {}).get('time_window_days',30)))
+                content, hits = europepmc_rss(value, int(cfg.get('defaults', {}).get('time_window_days',180)))
             else:
                 response = requests.get(value["url"],timeout=(10,30),
                     headers={"User-Agent":"PaperFirehose/0.4 research RSS reader"})
@@ -69,7 +69,7 @@ def main():
             path.write_bytes(content)
             result = {"key":key,"name":value["name"],"entries":len(feed.entries),"path":str(path.resolve())}
             if is_search:
-                result.update(search_hits=hits, truncated=hits>100)
+                result.update(search_hits=hits, truncated=hits>len(feed.entries))
             return result
         except Exception as exc:
             return {"key":key,"name":value["name"],"error":str(exc)[:300]}
@@ -91,4 +91,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 

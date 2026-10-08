@@ -41,6 +41,7 @@ class FeedProcessor:
         if topic_name not in self._profiles:
             topic = self.config.load_topic_config(topic_name)
             payload = {key: topic.get(key) for key in ("filter", "relevance", "ranking", "feeds")}
+            payload["time_window_days"] = self.time_delta.days
             signature = hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
             with sqlite3.connect(self.db.db_paths["all_feeds"]) as conn:
                 conn.execute("CREATE TABLE IF NOT EXISTS recommendation_profiles(topic TEXT PRIMARY KEY, signature TEXT)")
@@ -233,5 +234,6 @@ class FeedProcessor:
         Returns the number of rows deleted.
         """
         return self.db.delete_all_feeds_older_than(self.time_delta.days)
+
 
 

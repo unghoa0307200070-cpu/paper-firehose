@@ -90,7 +90,7 @@ feeds:
 priority_journals: []
 priority_journal_boost: 0.0
 defaults:
-  time_window_days: 30
+  time_window_days: 180
   top_n_per_topic: 15
   rank_threshold: 0.1
   ranking_negative_penalty: 0.25
@@ -98,3 +98,4 @@ defaults:
     rps: 1.0
     max_retries: 3
     mailto: ''
+

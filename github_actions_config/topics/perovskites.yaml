@@ -69,6 +69,8 @@ output:
   filename_summary: results_pharma_vision_summary.html
   archive: true
 relevance:
+  publication_window_days: 180
+  recency_weight: 0.10
   exclude_title_pattern: \b(erratum|corrigendum|retraction)\b|photothermal therap\w*|photodynamic therap\w*|magneto.?phototherap\w*|drug
     delivery|tumou?r (?:imag\w*|therap\w*|diagnos\w*)|cancer (?:imag\w*|therap\w*|diagnos\w*)|septic arthritis|plant
     disease|crop disease|leaf disease|autonomous driv\w*|self.driving|person re.identification|human action recognition|relighting|novel.view
@@ -220,3 +222,4 @@ relevance:
     融合: 2
     声学／超声: 1
   spectral_transfer_limit: 4
+
