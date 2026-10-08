@@ -162,7 +162,9 @@ jobs:
           pip install -e .
 
       - name: Verify recommendation relevance
-        run: python -m unittest discover -s tests -p test_multimodal_relevance.py
+        run: |
+          python -m unittest discover -s tests -p test_multimodal_relevance.py
+          python -m unittest discover -s tests -p test_pat_diversity.py
 
       - name: Purge recent entries
         if: ${{ env.PURGE_RECENT == 'true' }}
@@ -359,3 +361,4 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+

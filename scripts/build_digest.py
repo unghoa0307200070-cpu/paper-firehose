@@ -23,6 +23,49 @@ def read_rows(path, table):
         return [dict(row) for row in db.execute(f"SELECT * FROM {table}")]
 
 
+def select_rows(candidates, policy, total=15):
+    """Keep pharmaceutical papers first, then represent available sensing modes."""
+    rows, used, seen = [], Counter(), set()
+    limits = policy.config.get('display_limits', {})
+    spectral_limit = int(policy.config.get('spectral_transfer_limit', total))
+    spectral_only = 0
+    def add(row):
+        nonlocal spectral_only
+        result = policy.evaluate(row)
+        key = row.get('id') or row.get('entry_id') or row.get('link')
+        if not result or key in seen or len(rows) >= total:
+            return False
+        priority = result['priority']
+        modalities = set(result['modalities'])
+        only_spectral = priority < 4 and '光谱' in modalities and not modalities.intersection({'振动','声学／超声','视觉'})
+        if used[priority] >= int(limits.get(priority,total)) or (only_spectral and spectral_only >= spectral_limit):
+            return False
+        rows.append(row)
+        seen.add(key)
+        used[priority] += 1
+        spectral_only += int(only_spectral)
+        return True
+    for row in candidates:
+        if policy.evaluate(row)['priority'] >= 4 and len(rows) < min(8,total):
+            add(row)
+    # Targets apply only when actual relevant candidates exist; never invent entries.
+    mode_patterns = dict(policy.modalities)
+    for modality, target in policy.config.get('modality_targets', {}).items():
+        regex = mode_patterns.get(modality)
+        focused = [row for row in candidates if regex and regex.search(clean(row.get('title')))]
+        pool = focused or [row for row in candidates if modality in policy.evaluate(row)['modalities']]
+        for row in pool:
+            # A broad review mentioning vibration in its abstract should not
+            # displace a paper actually focused on vibration measurement.
+            count = sum(bool(regex.search(clean(item.get('title')))) if focused else modality in policy.evaluate(item)['modalities'] for item in rows)
+            if count >= int(target):
+                break
+            add(row)
+    for row in candidates:
+        add(row)
+    return rows
+
+
 def render(data, site):
     now = dt.datetime.now(dt.timezone(dt.timedelta(hours=8)))
     policy = load_policy()
@@ -37,17 +80,8 @@ def render(data, site):
         return (policy.evaluate(row)["priority"], row.get("rank_score") or 0, row.get("matched_date") or "")
     recent.sort(key=order, reverse=True)
     current.sort(key=order, reverse=True)
-    rows = []
-    used = Counter()
-    limits = policy.config.get("display_limits", {})
-    for row in current or recent:
-        priority = policy.evaluate(row)["priority"]
-        if used[priority] >= int(limits.get(priority, 15)):
-            continue
-        rows.append(row)
-        used[priority] += 1
-        if len(rows) == 15:
-            break
+    rows = select_rows(current or recent, policy)
+    mode_counts = Counter(mode for row in rows for mode in policy.evaluate(row)['modalities'])
     cards = []
     for row in rows:
         link = str(row.get("link") or "")
@@ -72,7 +106,7 @@ def render(data, site):
     availability = f"本次成功读取 {len(statuses)-len(failed)}/{len(statuses)} 个来源。" if statuses else ""
     failure_text = "暂时无法读取：" + "、".join(failed) + "。" if failed else ""
     notice = ("本次没有新增匹配论文，下面显示最近 7 天入库的候选论文。"
-              if not current else "下面优先展示过程检测与 PAT 文献，同类按语义相关性排序；最多 15 篇，通用方法最多 4 篇，不足时不补齐。")
+              if not current else "优先制药工程与 PAT，同时兼顾实际可获取的振动、视觉、声学与融合方法；最多 15 篇，不足时不补齐。")
     if not cards:
         cards = ['<article>目前没有可推荐的候选论文。历史记录可从下方入口查看。</article>']
     content = """<!doctype html><html lang="zh-CN"><meta charset="utf-8">
@@ -86,17 +120,18 @@ a{color:#165baf;text-decoration:none}a:hover{text-decoration:underline}
 <h1>多模态制药过程 PAT · 每日文献</h1>
 <p>机器视觉 · Raman／近红外／高光谱 · 振动与声学 · 传感器融合 · 软测量与过程质量</p>
 <p class="meta">更新于：UPDATE（北京时间） · 本次新增 NEW 篇 · 最近 7 天入库 RECENT 篇</p>
+<p class="meta">本页检测模态（同一论文可计入多项）：MODES</p>
 <div class="notice">NOTICE<br>AVAILABILITY FAILURE<br>优先制药与制剂过程检测，其次是可迁移的过程融合、光谱建模和环境适应方法。单项检测技术也可入选；入选依据为规则命中，不代表适用性已经验证。arXiv 来源包含预印本。</div>
 CARDS<footer><a href="results_pharma_vision_ranked.html">查看本次全部候选</a> ·
 <a href="history_viewer_cards.html">查看历史文献</a><p>每天计划于北京时间 09:00 更新，实际运行可能延迟。显示论文原文摘要，不调用付费 AI 摘要接口。</p></footer></main></html>"""
-    replacements = {"UPDATE":now.strftime("%Y-%m-%d %H:%M"),"NEW":str(len(current)),
+    replacements = {"MODES":clean(" · ".join(f"{mode} {mode_counts.get(mode,0)} 篇" for mode in ['振动','声学／超声','视觉','光谱','融合'])),"UPDATE":now.strftime("%Y-%m-%d %H:%M"),"NEW":str(len(current)),
                     "RECENT":str(len(recent)), "NOTICE":notice,"AVAILABILITY":availability,
                     "FAILURE":clean(failure_text),"CARDS":"".join(cards)}
     for key, value in replacements.items():
         content = content.replace(key, value)
     site.mkdir(parents=True, exist_ok=True)
     (site / "index.html").write_text(content,encoding="utf-8")
-    result = {"profile":"multimodal-pat-v1","new_matches":len(current),"recent_matches":len(recent),"displayed":len(rows),
+    result = {"profile":"pharma-pat-balanced-v2","modalities":dict(mode_counts),"pharma_process_displayed":sum(policy.evaluate(row)['priority']>=4 for row in rows),"new_matches":len(current),"recent_matches":len(recent),"displayed":len(rows),
               "sources":len(statuses),"failed_sources":failed}
     (site / "digest-status.json").write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding="utf-8")
     print(json.dumps(result,ensure_ascii=False),flush=True)
@@ -105,4 +140,5 @@ CARDS<footer><a href="results_pharma_vision_ranked.html">查看本次全部候�
 
 if __name__ == "__main__":
     render(Path(os.environ["PAPER_FIREHOSE_DATA_DIR"]), Path("site"))
+
 

@@ -1,4 +1,3 @@
-# 多模态 PAT：制药过程检测与可迁移测量方法
 database:
   path: papers.db
   all_feeds_path: all_feed_entries.db
@@ -79,6 +78,14 @@ feeds:
   arxiv-instrumentation:
     name: arXiv Instrumentation and Detectors
     url: https://rss.arxiv.org/rss/physics.ins-det
+    enabled: true
+  epmc-pharma-pat:
+    name: Europe PMC Pharmaceutical PAT
+    url: https://www.ebi.ac.uk/europepmc/webservices/rest/search
+    kind: europepmc
+    query: (TITLE_ABS:"process analytical technology" OR TITLE_ABS:"process analytical technologies" OR TITLE_ABS:"in-line
+      monitoring" OR TITLE_ABS:"online monitoring") AND (TITLE_ABS:pharmaceutical OR TITLE_ABS:granulation OR TITLE_ABS:"drug
+      manufacturing" OR TITLE_ABS:"tablet manufacturing")
     enabled: true
 priority_journals: []
 priority_journal_boost: 0.0
