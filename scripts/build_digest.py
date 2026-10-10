@@ -9,7 +9,7 @@ from collections import Counter
 from contextlib import closing
 from pathlib import Path
 from review_candidates import load_policy
-from paper_dates import within_window, reading_order
+from paper_dates import within_window, reading_order, publication_month
 
 
 def clean(value):
@@ -38,7 +38,7 @@ def select_rows(candidates, policy, total=15):
             return False
         priority = result['priority']
         modalities = set(result['modalities'])
-        only_spectral = priority < 4 and '光谱' in modalities and not modalities.intersection({'振动','声学／超声','视觉'})
+        only_spectral = priority < 4 and '光谱' in modalities and not modalities.intersection({'声学／超声','视觉','PIV／流场测量'})
         if used[priority] >= int(limits.get(priority,total)) or (only_spectral and spectral_only >= spectral_limit):
             return False
         rows.append(row)
@@ -49,15 +49,26 @@ def select_rows(candidates, policy, total=15):
     for row in candidates:
         if policy.evaluate(row)['priority'] >= 4 and len(rows) < min(8,total):
             add(row)
+    # Keep relevant computer methods visible alongside pharmaceutical PAT.
+    cs_sources = set(policy.config.get('computational_sources',[]))
+    def computational(row):
+        return row.get('feed_name') in cs_sources or policy.evaluate(row)['label'].startswith('计算机方法')
+    for row in candidates:
+        if sum(computational(item) for item in rows) >= int(policy.config.get('computational_target',0)):
+            break
+        if computational(row):
+            add(row)
     # Targets apply only when actual relevant candidates exist; never invent entries.
     mode_patterns = dict(policy.modalities)
-    for modality, target in policy.config.get('modality_targets', {}).items():
+    targets=policy.config.get('modality_targets', {})
+    target_order=policy.config.get('modality_target_order', list(targets))
+    for modality in target_order:
+        target=targets.get(modality,0)
         regex = mode_patterns.get(modality)
         focused = [row for row in candidates if regex and regex.search(clean(row.get('title')))]
         pool = focused or [row for row in candidates if modality in policy.evaluate(row)['modalities']]
         for row in pool:
-            # A broad review mentioning vibration in its abstract should not
-            # displace a paper actually focused on vibration measurement.
+            # Prefer papers actually focused on the modality in their title.
             count = sum(bool(regex.search(clean(item.get('title')))) if focused else modality in policy.evaluate(item)['modalities'] for item in rows)
             if count >= int(target):
                 break
@@ -102,7 +113,7 @@ def render(data, site):
             '<article><h2><a target="_blank" rel="noopener noreferrer" href="'
             + html.escape(link, quote=True) + '">' + clean(row.get("title"))
             + '</a></h2><p class="meta">' + clean(row.get("feed_name"))
-            + ' · 发表日期：' + clean(row.get("published_date") or "来源未提供")
+            + ' · 发表日期：' + clean((publication_month(row) + '（论文集月份，未提供具体日期）') if publication_month(row) else row.get("published_date") or "来源未提供")
             + '</p><p class="reason">入选依据：' + rationale + '</p><p>' + text + '</p></article>'
         )
     statuses_path = data / "feed-status.json"
@@ -111,7 +122,7 @@ def render(data, site):
     availability = f"本次成功读取 {len(statuses)-len(failed)}/{len(statuses)} 个来源。" if statuses else ""
     failure_text = "暂时无法读取：" + "、".join(failed) + "。" if failed else ""
     notice = ("本次没有新增匹配论文，继续推荐近半年已收录的相关文献。"
-              if not current else "优先制药工程与 PAT，同时兼顾实际可获取的振动、视觉、声学与融合方法；最多 15 篇，不足时不补齐。")
+              if not current else "优先制药工程与 PAT，同时兼顾机器视觉、PIV、多模态、具身智能和计算机学习与控制方法；最多 15 篇，不足时不补齐。")
     if not cards:
         cards = ['<article>目前没有可推荐的候选论文。历史记录可从下方入口查看。</article>']
     content = """<!doctype html><html lang="zh-CN"><meta charset="utf-8">
@@ -123,21 +134,21 @@ article,.notice{background:white;padding:22px 26px;margin:18px 0;border-radius:1
 a{color:#165baf;text-decoration:none}a:hover{text-decoration:underline}
 .meta,footer{color:#607084;font-size:14px}.reason{color:#245d50;font-size:14px}p{overflow-wrap:anywhere}</style><main>
 <h1>多模态制药过程 PAT · 每日文献</h1>
-<p>机器视觉 · Raman／近红外／高光谱 · 振动与声学 · 传感器融合 · 软测量与过程质量</p>
+<p>机器视觉 · 具身智能 · PIV · 多模态 · 过程控制与分析 · 深度学习 · 强化学习</p>
 <p class="meta">更新于：UPDATE（北京时间） · 本次新增 NEW 篇 · 近半年已收录 RECENT 篇</p>
 <p class="meta">文献范围：近 WINDOW 天（约半年）；同类论文相关性相近时优先较新的研究。</p>
 <p class="meta">本页检测模态（同一论文可计入多项）：MODES</p>
-<div class="notice">NOTICE<br>AVAILABILITY FAILURE<br>来源范围以可获取的订阅条目和检索记录为准，并非近半年的全部文献。<br>优先制药与制剂过程检测，其次是可迁移的过程融合、光谱建模和环境适应方法。单项检测技术也可入选；入选依据为规则命中，不代表适用性已经验证。arXiv 来源包含预印本。</div>
+<div class="notice">NOTICE<br>AVAILABILITY FAILURE<br>来源范围以可获取的订阅条目和检索记录为准，并非近半年的全部文献。<br>补充 CVPR、ICML 官方主会论文及 TPAMI、TIP、TNNLS、Information Fusion 期刊方法。首页为相关计算机方法保留最多 3 个优先位置（有候选时），其余按制药与过程检测相关性筛选。单项检测技术也可入选；入选依据为规则命中，不代表适用性已经验证。arXiv 来源包含预印本；会议与期刊分别标注来源。振动、近红外不再作为主动偏好，与 PAT 或多模态方法高度相关时仍可入选。</div>
 CARDS<footer><a href="results_pharma_vision_ranked.html">查看本次全部候选（按相关性）</a> ·
 <a href="history_viewer_cards.html">查看历史文献</a><p>每天计划于北京时间 09:00 更新，实际运行可能延迟。显示论文原文摘要，不调用付费 AI 摘要接口。</p></footer></main></html>"""
-    replacements = {"WINDOW":str(days),"MODES":clean(" · ".join(f"{mode} {mode_counts.get(mode,0)} 篇" for mode in ['振动','声学／超声','视觉','光谱','融合'])),"UPDATE":now.strftime("%Y-%m-%d %H:%M"),"NEW":str(len(current)),
+    replacements = {"WINDOW":str(days),"MODES":clean(" · ".join(f"{mode} {mode_counts.get(mode,0)} 篇" for mode in ['视觉','PIV／流场测量','融合','具身智能','深度学习','强化学习','光谱','声学／超声'])),"UPDATE":now.strftime("%Y-%m-%d %H:%M"),"NEW":str(len(current)),
                     "RECENT":str(len(recent)), "NOTICE":notice,"AVAILABILITY":availability,
                     "FAILURE":clean(failure_text),"CARDS":"".join(cards)}
     for key, value in replacements.items():
         content = content.replace(key, value)
     site.mkdir(parents=True, exist_ok=True)
     (site / "index.html").write_text(content,encoding="utf-8")
-    result = {"profile":"pharma-pat-halfyear-v3","publication_window_days":days,"recency_weight":weight,"modalities":dict(mode_counts),"pharma_process_displayed":sum(policy.evaluate(row)['priority']>=4 for row in rows),"new_matches":len(current),"recent_matches":len(recent),"displayed":len(rows),
+    result = {"profile":"pharma-pat-computational-v4","computational_displayed":sum(row.get("feed_name") in policy.config.get("computational_sources",[]) or policy.evaluate(row)["label"].startswith("计算机方法") for row in rows),"publication_window_days":days,"recency_weight":weight,"modalities":dict(mode_counts),"pharma_process_displayed":sum(policy.evaluate(row)['priority']>=4 for row in rows),"new_matches":len(current),"recent_matches":len(recent),"displayed":len(rows),
               "sources":len(statuses),"failed_sources":failed}
     (site / "digest-status.json").write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding="utf-8")
     print(json.dumps(result,ensure_ascii=False),flush=True)
@@ -146,6 +157,7 @@ CARDS<footer><a href="results_pharma_vision_ranked.html">查看本次全部候�
 
 if __name__ == "__main__":
     render(Path(os.environ["PAPER_FIREHOSE_DATA_DIR"]), Path("site"))
+
 
 
 

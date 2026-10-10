@@ -1,6 +1,5 @@
-# 制药工程 PAT 优先；兼顾振动、光谱、视觉及跨行业融合方法
 name: Multimodal Pharmaceutical PAT
-description: 多模态制药过程检测：机器视觉、光谱、振动／声学、传感器融合、软测量与过程质量监测
+description: 制药工程 PAT 与过程检测；机器视觉、PIV、多模态、过程控制与分析、具身智能、深度学习和强化学习方法
 feeds:
 - arxiv-cv
 - arxiv-imaging
@@ -17,29 +16,40 @@ feeds:
 - sensors-actuators-b
 - analytica-chimica-acta
 - control-eng-practice
-- mechanical-signal
 - food-control
 - arxiv-signal
 - arxiv-instrumentation
 - epmc-pharma-pat
+- cvpr-official
+- icml-official
+- cs-tpami
+- cs-tip
+- cs-tnnls
+- cs-information-fusion
+- piv-fluid-methods
 filter:
-  pattern: \b(raman|nir|ftir|nmr|uv.vis|libs)\b|spectroscop\w*|hyperspectral|near.infrared|mid.infrared|spectral
-    imaging|machine vision|computer vision|image.based|video.based|camera|image analys\w*|image processing|visual
-    inspect\w*|optical imaging|image segment\w*|\bimaging\b|vibration\w*|vibrational|acceleromet\w*|acceleration
-    signal\w*|vibrometr\w*|vibro.acoustic|modal analys\w*|operational modal|acoustic\w*|ultrason\w*|sound signal\w*|sound.pressure|auditory
-    signal\w*|multi.modal|multi.sensor|sensor fusion|data fusion|multi.block|multi.view|multi.source|spectral fusion|chemometric\w*|soft.sensor\w*|dielectric
-    spectroscop\w*|electrical impedance|focused beam reflectance|\bfbrm\b|spatial filter velocimetr\w*|process analytical
-    technolog\w*|anti.fog\w*|antifog\w*|anti.condens\w*|condensation preven\w*|dew preven\w*|high.temperature|high.humidity|humid
-    environment|condens\w*
+  pattern: \b(raman|ftir|nmr|uv.vis|libs)\b|spectroscop\w*|hyperspectral|mid.infrared|spectral
+    imaging|machine vision|computer vision|image.based|video.based|camera|image analys\w*|image
+    processing|visual inspect\w*|optical imaging|image segment\w*|\bimaging\b|acoustic\w*|ultrason\w*|sound
+    signal\w*|sound.pressure|auditory signal\w*|multi.modal|multi.sensor|sensor fusion|data
+    fusion|multi.block|multi.view|multi.source|spectral fusion|chemometric\w*|soft.sensor\w*|dielectric
+    spectroscop\w*|electrical impedance|focused beam reflectance|\bfbrm\b|spatial
+    filter velocimetr\w*|process analytical technolog\w*|anti.fog\w*|antifog\w*|anti.condens\w*|condensation
+    preven\w*|dew preven\w*|high.temperature|high.humidity|humid environment|condens\w*|\bpiv\b|particle
+    image velocimetr\w*|particle tracking velocimetr\w*|embodied|robotic\w*|visuo.motor|vision.language.action|process
+    control|process analys\w*|deep learn\w*|reinforcement learn\w*|self.supervised|contrastive
+    learn\w*|domain adapt\w*|few.shot|zero.shot|anomaly detect\w*|defect detect\w*|time.series|multimodal|cross.modal|multi.sensory
   fields:
   - title
   - summary
 ranking:
-  query: Pharmaceutical engineering process analytical technology for formulation manufacturing, granulation, powder
-    blending, coating, drying and process endpoints. Multimodal quality monitoring with vibration signals, acoustic
-    emission, ultrasound, machine vision, Raman, near-infrared spectroscopy and hyperspectral imaging. Sensor fusion,
-    soft sensing, non-contact vibration measurement and robust signal processing. Transferable advanced industrial
-    condition monitoring and measurement methods.
+  query: Pharmaceutical engineering process analytical technology, formulation manufacturing
+    quality monitoring, process analysis and process control. Machine vision, particle
+    image velocimetry PIV, Raman spectroscopy, hyperspectral imaging, multimodal sensor
+    fusion and soft sensing. Transferable computer science methods for industrial
+    visual anomaly and defect detection, embodied perception and robotic control,
+    deep learning, reinforcement learning for process control, self-supervised representation
+    learning, domain adaptation, few-shot learning and time series process modelling.
   negative_queries:
   - erratum
   - corrigendum
@@ -47,7 +57,6 @@ ranking:
   - drug delivery
   - clinical diagnosis
   - plant disease
-  - numerical simulation of droplets
   preferred_authors: []
   priority_author_boost: 0.0
   model: all-MiniLM-L6-v2
@@ -60,9 +69,10 @@ paperqa:
   max_retries: 3
   llm: gpt-4o-mini
   summary_llm: gpt-4o-mini
-  prompt: Evaluate experimental methods for multimodal pharmaceutical process analytical technology, spectroscopy,
-    machine vision, vibration/acoustic sensing and sensor fusion. Distinguish manufacturing quality monitoring from
-    medical diagnosis. Return valid JSON with summary, topical_relevance and novelty_impact fields.
+  prompt: 'Evaluate pharmaceutical PAT, process control and transferable computational
+    methods: machine vision, PIV, multimodal sensor fusion, embodied intelligence,
+    deep learning and reinforcement learning. Return valid JSON with summary, topical_relevance
+    and novelty_impact.'
 output:
   filename: results_pharma_vision.html
   filename_ranked: results_pharma_vision_ranked.html
@@ -70,80 +80,133 @@ output:
   archive: true
 relevance:
   publication_window_days: 180
-  recency_weight: 0.10
-  exclude_title_pattern: \b(erratum|corrigendum|retraction)\b|photothermal therap\w*|photodynamic therap\w*|magneto.?phototherap\w*|drug
-    delivery|tumou?r (?:imag\w*|therap\w*|diagnos\w*)|cancer (?:imag\w*|therap\w*|diagnos\w*)|septic arthritis|plant
-    disease|crop disease|leaf disease|autonomous driv\w*|self.driving|person re.identification|human action recognition|relighting|novel.view
-    synth\w*|text.to.image|image generation|bacterial identification|plant phenotyp\w*|\bmg.vqa\b|visual question
-    answering|\bexhaled\b|human plasma|clinical diagnosis|pedagog\w*|(?:pharmaceut\w*|biotechnolog\w*) education|regenerative
-    medicine|nanoparticles against antimicrobial resistance
+  recency_weight: 0.1
+  exclude_title_pattern: stock price|financial forecast|portfolio optimi\w*|cryptocurrency|\b(erratum|corrigendum|retraction)\b|photothermal
+    therap\w*|photodynamic therap\w*|magneto.?phototherap\w*|drug delivery|tumou?r
+    (?:imag\w*|therap\w*|diagnos\w*)|cancer (?:imag\w*|therap\w*|diagnos\w*)|septic
+    arthritis|plant disease|crop disease|leaf disease|autonomous driv\w*|self.driving|person
+    re.identification|human action recognition|relighting|novel.view synth\w*|text.to.image|image
+    generation|bacterial identification|plant phenotyp\w*|\bmg.vqa\b|visual question
+    answering|\bexhaled\b|human plasma|clinical diagnosis|pedagog\w*|(?:pharmaceut\w*|biotechnolog\w*)
+    education|regenerative medicine|nanoparticles against antimicrobial resistance|medical
+    anomaly|medical image|retinal|skin lesion|brain tumou?r|mobile game|motion stylization|virtual
+    try.on
   modalities:
-    视觉: machine vision|computer vision|image.based|video.based|camera|image analys\w*|image processing|visual inspect\w*|optical
-      imaging|image segment\w*|\bvideo\b|optical flow|digital image correlation
-    光谱: \b(raman|nir|ftir|nmr|uv.vis|libs)\b|spectroscop\w*|hyperspectral|near.infrared|mid.infrared|spectral imaging
-    融合: multi.modal|multi.sensor|sensor fusion|data fusion|multi.block|multi.view|multi.source|spectral fusion
-    振动: vibration\w*|vibrational|acceleromet\w*|acceleration signal\w*|vibrometr\w*|vibro.acoustic|modal analys\w*|operational
-      modal
+    视觉: machine vision|computer vision|image.based|video.based|camera|image analys\w*|image
+      processing|visual inspect\w*|optical imaging|image segment\w*|\bvideo\b|optical
+      flow|digital image correlation|\bvision\b|\bvisual\b|\bimage\w*\b
+    光谱: \b(raman|ftir|nmr|uv.vis|libs)\b|spectroscop\w*|hyperspectral|mid.infrared|spectral
+      imaging
+    融合: multi.modal|multi.sensor|sensor fusion|data fusion|multi.block|multi.view|multi.source|spectral
+      fusion|cross.modal|multi.modality|multi.sensory
     声学／超声: acoustic\w*|ultrason\w*|sound signal\w*|sound.pressure|auditory signal\w*
+    PIV／流场测量: \bpiv\b|particle image velocimetr\w*|particle tracking velocimetr\w*|flow
+      field measur\w*
+    具身智能: embodied|robotic\w*|robot manipulation|visuo.motor|visual.motor|vision.language.action|dexterous|physical
+      intelligence
+    深度学习: deep learn\w*|deep neural|self.supervised|contrastive learn\w*|foundation
+      model\w*|transformer\w*
+    强化学习: reinforcement learn\w*|offline rl|model.based rl|policy learn\w*|policy
+      optimi[sz]\w*
   routes:
   - label: 制药工程 PAT
     priority: 5
     boost: 0.25
     all_patterns:
     - process analytical technolog\w*
-    - pharmaceut\w*|traditional chinese medicin\w*|herbal|astragali radix|gelatin|drug product\w*|drug manufactur\w*|dosage
-      form\w*|\btablet\w*\b|\bpellet\w*\b|granulat\w*|fluidi[sz]ed.bed|powder blend\w*|\bejiao\b|gelatin manufactur\w*|crystalli[sz]ation|\bextrusion\b
+    - pharmaceut\w*|traditional chinese medicin\w*|herbal|astragali radix|gelatin|drug
+      product\w*|drug manufactur\w*|dosage form\w*|\btablet\w*\b|\bpellet\w*\b|granulat\w*|fluidi[sz]ed.bed|powder
+      blend\w*|\bejiao\b|gelatin manufactur\w*|crystalli[sz]ation|\bextrusion\b
     - manufactur\w*|formulat\w*|granulat\w*|\bcoating\b|\bblending\b|\bmixing\b|\bdrying\b|crystalli[sz]\w*|\btablet\w*\b|\bpellet\w*\b|process
-      monitor\w*|process control|content uniformity|moisture|quality control|quality assurance|decoction\w*|industrial
-      line|in.line|on.line
+      monitor\w*|process control|content uniformity|moisture|quality control|quality
+      assurance|decoction\w*|industrial line|in.line|on.line
   - label: 制药／制剂过程检测
     priority: 4
     boost: 0.2
     all_patterns:
-    - pharmaceut\w*|traditional chinese medicin\w*|herbal|astragali radix|gelatin|drug product\w*|drug manufactur\w*|dosage
-      form\w*|\btablet\w*\b|\bpellet\w*\b|granulat\w*|fluidi[sz]ed.bed|powder blend\w*|\bejiao\b|gelatin manufactur\w*|crystalli[sz]ation|\bextrusion\b
-    - \b(raman|nir|ftir|nmr|uv.vis|libs)\b|spectroscop\w*|hyperspectral|near.infrared|mid.infrared|spectral imaging|machine
-      vision|computer vision|image.based|video.based|camera|image analys\w*|image processing|visual inspect\w*|optical
-      imaging|image segment\w*|\bvideo\b|optical flow|digital image correlation|vibration\w*|vibrational|acceleromet\w*|acceleration
-      signal\w*|vibrometr\w*|vibro.acoustic|modal analys\w*|operational modal|acoustic\w*|ultrason\w*|sound signal\w*|sound.pressure|auditory
+    - pharmaceut\w*|traditional chinese medicin\w*|herbal|astragali radix|gelatin|drug
+      product\w*|drug manufactur\w*|dosage form\w*|\btablet\w*\b|\bpellet\w*\b|granulat\w*|fluidi[sz]ed.bed|powder
+      blend\w*|\bejiao\b|gelatin manufactur\w*|crystalli[sz]ation|\bextrusion\b
+    - \b(raman|ftir|nmr|uv.vis|libs)\b|spectroscop\w*|hyperspectral|mid.infrared|spectral
+      imaging|machine vision|computer vision|image.based|video.based|camera|image
+      analys\w*|image processing|visual inspect\w*|optical imaging|image segment\w*|\bvideo\b|optical
+      flow|digital image correlation|acoustic\w*|ultrason\w*|sound signal\w*|sound.pressure|auditory
       signal\w*|multi.modal|multi.sensor|sensor fusion|data fusion|multi.block|multi.view|multi.source|spectral
-      fusion|chemometric\w*|soft.sensor\w*|dielectric spectroscop\w*|electrical impedance|focused beam reflectance|\bfbrm\b|spatial
-      filter velocimetr\w*
+      fusion|chemometric\w*|soft.sensor\w*|dielectric spectroscop\w*|electrical impedance|focused
+      beam reflectance|\bfbrm\b|spatial filter velocimetr\w*
     - monitor\w*|in.line|on.line|inline|online|in.situ|real.time|non.destructive|quality|endpoint|end.point|moisture|concentration|content
       uniformity|particle siz\w*|size distribution|classif\w*|quantif\w*|identif\w*|detect\w*|measur\w*|estim\w*|predict\w*|control
     - manufactur\w*|formulat\w*|granulat\w*|\bcoating\b|\bblending\b|\bmixing\b|\bdrying\b|crystalli[sz]\w*|\btablet\w*\b|\bpellet\w*\b|process
-      monitor\w*|process control|content uniformity|moisture|quality control|quality assurance|decoction\w*|industrial
-      line|in.line|on.line
+      monitor\w*|process control|content uniformity|moisture|quality control|quality
+      assurance|decoction\w*|industrial line|in.line|on.line
+  - label: PIV／光学流场与过程分析
+    priority: 3
+    boost: 0.1
+    all_patterns:
+    - \bpiv\b|particle image velocimetr\w*|particle tracking velocimetr\w*|flow field
+      measur\w*
+    - measur\w*|veloc\w*|flow|fluid|particle|process|optical
+  - label: 计算机方法 · 具身感知与控制
+    priority: 3
+    boost: 0.08
+    all_patterns:
+    - embodied|robotic\w*|robot manipulation|visuo.motor|visual.motor|vision.language.action|dexterous|physical
+      intelligence
+    - percept\w*|control|manipulat\w*|sensor|multimodal|multi.modal|policy|reinforcement|vision|visual|learning
+  - label: 计算机方法 · 过程控制与强化学习
+    priority: 3
+    boost: 0.1
+    all_patterns:
+    - process control|process monitor\w*|process analys\w*|model predictive control|industrial|manufactur\w*|chemical
+      process|soft.sensor
+    - reinforcement learn\w*|deep learn\w*|neural|data.driven|policy optimi[sz]\w*|model.based
+      rl
+  - label: 计算机方法 · 视觉检测与跨场景适应
+    priority: 2
+    boost: 0.06
+    all_patterns:
+    - visual|vision|image|pixel|camera|industrial|defect|anomaly segmentation
+    - anomaly detect\w*|anomaly segmentation|defect detect\w*|defect segment\w*|quality
+      inspect\w*|domain adapt\w*|cross.domain|few.shot|zero.shot|self.supervised|contrastive
+      learn\w*|deep learn\w*
+  - label: 计算机方法 · 多模态学习与融合
+    priority: 2
+    boost: 0.06
+    all_patterns:
+    - multi.modal|multimodal|cross.modal|sensor fusion|multi.sensor|multi.sensory
+    - fusion|align\w*|represent\w*|contrastive|learn\w*|missing modal\w*|robust|sensor|percept\w*
+  - label: 计算机方法 · 时序过程建模
+    priority: 2
+    boost: 0.06
+    all_patterns:
+    - time.series|multivariate signal|sensor data|time.series foundation
+    - anomaly|forecast\w*|causal|representation|self.supervised|deep learn\w*|foundation
+      model|transformer|domain adapt\w*
+  - label: 计算机方法 · 强化学习控制
+    priority: 2
+    boost: 0.04
+    all_patterns:
+    - reinforcement learn\w*|offline rl|model.based rl|policy learn\w*|policy optimi[sz]\w*
+    - control|dynamical system|continuous action|real.world|robot|sensor|physical|process|offline
+      rl
   - label: 其他行业 PAT 与过程检测
     priority: 3
     boost: 0.1
     all_patterns:
     - process analytical technolog\w*
-    - \b(raman|nir|ftir|nmr|uv.vis|libs)\b|spectroscop\w*|hyperspectral|near.infrared|mid.infrared|spectral imaging|machine
-      vision|computer vision|image.based|video.based|camera|image analys\w*|image processing|visual inspect\w*|optical
-      imaging|image segment\w*|\bvideo\b|optical flow|digital image correlation|vibration\w*|vibrational|acceleromet\w*|acceleration
-      signal\w*|vibrometr\w*|vibro.acoustic|modal analys\w*|operational modal|acoustic\w*|ultrason\w*|sound signal\w*|sound.pressure|auditory
+    - \b(raman|ftir|nmr|uv.vis|libs)\b|spectroscop\w*|hyperspectral|mid.infrared|spectral
+      imaging|machine vision|computer vision|image.based|video.based|camera|image
+      analys\w*|image processing|visual inspect\w*|optical imaging|image segment\w*|\bvideo\b|optical
+      flow|digital image correlation|acoustic\w*|ultrason\w*|sound signal\w*|sound.pressure|auditory
       signal\w*|multi.modal|multi.sensor|sensor fusion|data fusion|multi.block|multi.view|multi.source|spectral
-      fusion|chemometric\w*|soft.sensor\w*|dielectric spectroscop\w*|electrical impedance|focused beam reflectance|\bfbrm\b|spatial
-      filter velocimetr\w*|monitor\w*|in.line|on.line|inline|online|in.situ|real.time|non.destructive|quality|endpoint|end.point|moisture|concentration|content
+      fusion|chemometric\w*|soft.sensor\w*|dielectric spectroscop\w*|electrical impedance|focused
+      beam reflectance|\bfbrm\b|spatial filter velocimetr\w*|monitor\w*|in.line|on.line|inline|online|in.situ|real.time|non.destructive|quality|endpoint|end.point|moisture|concentration|content
       uniformity|particle siz\w*|size distribution|classif\w*|quantif\w*|identif\w*|detect\w*|measur\w*|estim\w*|predict\w*|control
-  - label: 视觉与振动融合／非接触测振
-    priority: 3
-    boost: 0.12
-    all_patterns:
-    - vibration\w*|vibrational|acceleromet\w*|acceleration signal\w*|vibrometr\w*|vibro.acoustic|modal analys\w*|operational
-      modal
-    - machine vision|computer vision|image.based|video.based|camera|image analys\w*|image processing|visual inspect\w*|optical
-      imaging|image segment\w*|\bvideo\b|optical flow|digital image correlation|video|optical flow|digital image
-      correlation
-    - monitor\w*|measur\w*|detect\w*|diagnos\w*|fault|damage|wear|anomal\w*|estim\w*|identif\w*|prognos\w*|remaining
-      useful life|reconstruct\w*|inspect\w*|characteri[sz]\w*
-  - label: 振动／声学检测与设备状态方法
+  - label: 声学检测与设备状态方法
     priority: 2
     boost: 0.08
     all_patterns:
-    - vibration\w*|vibrational|acceleromet\w*|acceleration signal\w*|vibrometr\w*|vibro.acoustic|modal analys\w*|operational
-      modal|acoustic\w*|ultrason\w*|sound signal\w*|sound.pressure|auditory signal\w*
+    - acoustic\w*|ultrason\w*|sound signal\w*|sound.pressure|auditory signal\w*
     - bearing\w*|\bgear\w*\b|\brotor\w*\b|rotating|machin\w*|equipment|\bmotor\w*\b|\bpump\w*\b|\bmixer\w*\b|\bdryer\w*\b|\bblade\w*\b|structur\w*|\bcable\w*\b|\bpipeline\w*\b|\bwear\b|industrial|condition
       monitor\w*|fault diagnos\w*
     - monitor\w*|measur\w*|detect\w*|diagnos\w*|fault|damage|wear|anomal\w*|estim\w*|identif\w*|prognos\w*|remaining
@@ -158,40 +221,44 @@ relevance:
     priority: 3
     boost: 0.12
     all_patterns:
-    - food|\btea\b|\bmilk\b|\byogurt\b|\bstarch\b|\bsugar\b|dairy|ferment\w*|bioreactor\w*|chemical process\w*|industrial|manufactur\w*|production
-      (?:process|line|monitoring|quality)|process monitor\w*|process control|powder|\bmixing\b|\bdrying\b|\bbubble\w*\b|\bfoam\w*\b
-    - multi.modal|multi.sensor|sensor fusion|data fusion|multi.block|multi.view|multi.source|spectral fusion
-    - \b(raman|nir|ftir|nmr|uv.vis|libs)\b|spectroscop\w*|hyperspectral|near.infrared|mid.infrared|spectral imaging|machine
-      vision|computer vision|image.based|video.based|camera|image analys\w*|image processing|visual inspect\w*|optical
-      imaging|image segment\w*|\bvideo\b|optical flow|digital image correlation|vibration\w*|vibrational|acceleromet\w*|acceleration
-      signal\w*|vibrometr\w*|vibro.acoustic|modal analys\w*|operational modal|acoustic\w*|ultrason\w*|sound signal\w*|sound.pressure|auditory
+    - food|\btea\b|\bmilk\b|\byogurt\b|\bstarch\b|\bsugar\b|dairy|ferment\w*|bioreactor\w*|chemical
+      process\w*|industrial|manufactur\w*|production (?:process|line|monitoring|quality)|process
+      monitor\w*|process control|powder|\bmixing\b|\bdrying\b|\bbubble\w*\b|\bfoam\w*\b
+    - multi.modal|multi.sensor|sensor fusion|data fusion|multi.block|multi.view|multi.source|spectral
+      fusion
+    - \b(raman|ftir|nmr|uv.vis|libs)\b|spectroscop\w*|hyperspectral|mid.infrared|spectral
+      imaging|machine vision|computer vision|image.based|video.based|camera|image
+      analys\w*|image processing|visual inspect\w*|optical imaging|image segment\w*|\bvideo\b|optical
+      flow|digital image correlation|acoustic\w*|ultrason\w*|sound signal\w*|sound.pressure|auditory
       signal\w*|multi.modal|multi.sensor|sensor fusion|data fusion|multi.block|multi.view|multi.source|spectral
-      fusion|chemometric\w*|soft.sensor\w*|dielectric spectroscop\w*|electrical impedance|focused beam reflectance|\bfbrm\b|spatial
-      filter velocimetr\w*
+      fusion|chemometric\w*|soft.sensor\w*|dielectric spectroscop\w*|electrical impedance|focused
+      beam reflectance|\bfbrm\b|spatial filter velocimetr\w*
     - monitor\w*|in.line|on.line|inline|online|in.situ|real.time|non.destructive|quality|endpoint|end.point|moisture|concentration|content
       uniformity|particle siz\w*|size distribution|classif\w*|quantif\w*|identif\w*|detect\w*|measur\w*|estim\w*|predict\w*|control
   - label: 可迁移的过程检测方法
     priority: 2
     boost: 0.06
     all_patterns:
-    - food|\btea\b|\bmilk\b|\byogurt\b|\bstarch\b|\bsugar\b|dairy|ferment\w*|bioreactor\w*|chemical process\w*|industrial|manufactur\w*|production
-      (?:process|line|monitoring|quality)|process monitor\w*|process control|powder|\bmixing\b|\bdrying\b|\bbubble\w*\b|\bfoam\w*\b
-    - \b(raman|nir|ftir|nmr|uv.vis|libs)\b|spectroscop\w*|hyperspectral|near.infrared|mid.infrared|spectral imaging|machine
-      vision|computer vision|image.based|video.based|camera|image analys\w*|image processing|visual inspect\w*|optical
-      imaging|image segment\w*|\bvideo\b|optical flow|digital image correlation|vibration\w*|vibrational|acceleromet\w*|acceleration
-      signal\w*|vibrometr\w*|vibro.acoustic|modal analys\w*|operational modal|acoustic\w*|ultrason\w*|sound signal\w*|sound.pressure|auditory
+    - food|\btea\b|\bmilk\b|\byogurt\b|\bstarch\b|\bsugar\b|dairy|ferment\w*|bioreactor\w*|chemical
+      process\w*|industrial|manufactur\w*|production (?:process|line|monitoring|quality)|process
+      monitor\w*|process control|powder|\bmixing\b|\bdrying\b|\bbubble\w*\b|\bfoam\w*\b
+    - \b(raman|ftir|nmr|uv.vis|libs)\b|spectroscop\w*|hyperspectral|mid.infrared|spectral
+      imaging|machine vision|computer vision|image.based|video.based|camera|image
+      analys\w*|image processing|visual inspect\w*|optical imaging|image segment\w*|\bvideo\b|optical
+      flow|digital image correlation|acoustic\w*|ultrason\w*|sound signal\w*|sound.pressure|auditory
       signal\w*|multi.modal|multi.sensor|sensor fusion|data fusion|multi.block|multi.view|multi.source|spectral
-      fusion|chemometric\w*|soft.sensor\w*|dielectric spectroscop\w*|electrical impedance|focused beam reflectance|\bfbrm\b|spatial
-      filter velocimetr\w*
+      fusion|chemometric\w*|soft.sensor\w*|dielectric spectroscop\w*|electrical impedance|focused
+      beam reflectance|\bfbrm\b|spatial filter velocimetr\w*
     - monitor\w*|in.line|on.line|inline|online|in.situ|real.time|non.destructive|quality|endpoint|end.point|moisture|concentration|content
       uniformity|particle siz\w*|size distribution|classif\w*|quantif\w*|identif\w*|detect\w*|measur\w*|estim\w*|predict\w*|control
   - label: 光谱建模／化学计量学方法
     priority: 1
     boost: 0.02
     all_patterns:
-    - \b(raman|nir|ftir|nmr|uv.vis|libs)\b|spectroscop\w*|hyperspectral|near.infrared|mid.infrared|spectral imaging
-    - chemometric\w*|calibrat\w*|domain adapt\w*|transfer learn\w*|model transfer|multi.variate|partial least squares|robust\w*|interpretab\w*|multi.block|data
-      fusion|spectral fusion
+    - \b(raman|ftir|nmr|uv.vis|libs)\b|spectroscop\w*|hyperspectral|mid.infrared|spectral
+      imaging
+    - chemometric\w*|calibrat\w*|domain adapt\w*|transfer learn\w*|model transfer|multi.variate|partial
+      least squares|robust\w*|interpretab\w*|multi.block|data fusion|spectral fusion
   - label: 成像／光学设备环境适应
     priority: 1
     boost: 0.02
@@ -203,23 +270,44 @@ relevance:
     priority: 1
     boost: 0.02
     all_patterns:
-    - multi.modal|multi.sensor|sensor fusion|data fusion|multi.block|multi.view|multi.source|spectral fusion
-    - vibration\w*|vibrational|acceleromet\w*|acceleration signal\w*|vibrometr\w*|vibro.acoustic|modal analys\w*|operational
-      modal|acoustic\w*|ultrason\w*|sound signal\w*|sound.pressure|auditory signal\w*|\b(raman|nir|ftir|nmr|uv.vis|libs)\b|spectroscop\w*|hyperspectral|near.infrared|mid.infrared|spectral
+    - multi.modal|multi.sensor|sensor fusion|data fusion|multi.block|multi.view|multi.source|spectral
+      fusion
+    - acoustic\w*|ultrason\w*|sound signal\w*|sound.pressure|auditory signal\w*|\b(raman|ftir|nmr|uv.vis|libs)\b|spectroscop\w*|hyperspectral|mid.infrared|spectral
       imaging
     - condition monitor\w*|fault diagnos\w*|soft.sensor\w*|process monitor\w*|industrial
     - monitor\w*|in.line|on.line|inline|online|in.situ|real.time|non.destructive|quality|endpoint|end.point|moisture|concentration|content
       uniformity|particle siz\w*|size distribution|classif\w*|quantif\w*|identif\w*|detect\w*|measur\w*|estim\w*|predict\w*|control
   display_limits:
     1: 4
-    2: 7
-    3: 8
+    2: 10
+    3: 10
     4: 15
     5: 15
   modality_targets:
-    振动: 2
     视觉: 2
     融合: 2
     声学／超声: 1
+    PIV／流场测量: 1
   spectral_transfer_limit: 4
-
+  computational_target: 3
+  computational_sources:
+  - CVPR（主会，CVF 官方）
+  - ICML（主会，PMLR 官方）
+  - IEEE TPAMI
+  - IEEE TIP
+  - IEEE TNNLS
+  - Information Fusion
+  modality_target_order:
+  - PIV／流场测量
+  - 视觉
+  - 融合
+  - 声学／超声
+preference_keywords:
+- 机器视觉
+- 具身智能
+- PIV
+- 多模态
+- 过程控制
+- 过程分析
+- 深度学习
+- 强化学习

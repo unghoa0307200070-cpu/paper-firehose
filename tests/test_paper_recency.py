@@ -38,7 +38,7 @@ class PaperRecencyTests(unittest.TestCase):
     def test_freshness_breaks_close_relevance_without_overriding_large_gap(self):
         self.assertGreater(reading_order(self.paper(2),self.policy,today=self.today),reading_order(self.paper(150),self.policy,today=self.today))
         self.assertGreater(reading_order(self.paper(150,0.9),self.policy,today=self.today),reading_order(self.paper(2,0.5),self.policy,today=self.today))
-        transfer={'title':'Vibration signal analysis for bearing fault diagnosis','published_date':str(self.today),'rank_score':1.0}
+        transfer={'title':'Self-supervised visual anomaly detection','published_date':str(self.today),'rank_score':1.0}
         self.assertGreater(reading_order(self.paper(150,0.4),self.policy,today=self.today),reading_order(transfer,self.policy,today=self.today))
 
     def test_current_papers_do_not_hide_half_year_archive(self):
@@ -67,3 +67,4 @@ class PaperRecencyTests(unittest.TestCase):
 
 if __name__=='__main__':
     unittest.main()
+

@@ -60,6 +60,7 @@ jobs:
             ${{ env.PAPER_FIREHOSE_DATA_DIR }}/all_feed_entries.db
             ${{ env.PAPER_FIREHOSE_DATA_DIR }}/matched_entries_history.db
             ${{ env.PAPER_FIREHOSE_DATA_DIR }}/papers.db
+            ${{ env.PAPER_FIREHOSE_DATA_DIR }}/source-cache
           key: runtime-dbs-${{ github.run_id }}
           restore-keys: |
             runtime-dbs-
@@ -166,6 +167,7 @@ jobs:
           python -m unittest discover -s tests -p test_multimodal_relevance.py
           python -m unittest discover -s tests -p test_pat_diversity.py
           python -m unittest discover -s tests -p test_paper_recency.py
+          python -m unittest discover -s tests -p test_computational_methods.py
 
       - name: Purge recent entries
         if: ${{ env.PURGE_RECENT == 'true' }}
@@ -213,6 +215,7 @@ jobs:
             ${{ env.PAPER_FIREHOSE_DATA_DIR }}/all_feed_entries.db
             ${{ env.PAPER_FIREHOSE_DATA_DIR }}/matched_entries_history.db
             ${{ env.PAPER_FIREHOSE_DATA_DIR }}/papers.db
+            ${{ env.PAPER_FIREHOSE_DATA_DIR }}/source-cache
             ${{ env.PAPER_FIREHOSE_DATA_DIR }}/matched_entries_history.recent.db
 
       - name: Commit small databases to data branch
@@ -326,6 +329,7 @@ jobs:
             ${{ env.PAPER_FIREHOSE_DATA_DIR }}/all_feed_entries.db
             ${{ env.PAPER_FIREHOSE_DATA_DIR }}/matched_entries_history.db
             ${{ env.PAPER_FIREHOSE_DATA_DIR }}/papers.db
+            ${{ env.PAPER_FIREHOSE_DATA_DIR }}/source-cache
           key: runtime-dbs-${{ github.run_id }}
 
       - name: Prepare site
@@ -362,5 +366,6 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
 
 

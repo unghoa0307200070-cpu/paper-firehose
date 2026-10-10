@@ -8,7 +8,7 @@ from contextlib import closing
 from pathlib import Path
 import yaml
 from paper_firehose.processors.relevance import RelevancePolicy
-from paper_dates import within_window
+from paper_dates import within_window, publication_month
 
 
 def load_policy():
@@ -29,6 +29,10 @@ def review(path, table, key, policy):
         rejected=[]
         groups=Counter()
         for row in rows:
+            month=publication_month(row)
+            if month:
+                row['published_date']=month
+                db.execute(f'UPDATE {table} SET published_date = ? WHERE {key} = ?',(month,row[key]))
             result=policy.evaluate(row)
             if result and within_window(row,int(policy.config.get("publication_window_days",180))):
                 groups[result['label']]+=1
@@ -55,3 +59,4 @@ if __name__=='__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument('--site')
     main(parser.parse_args().site)
+

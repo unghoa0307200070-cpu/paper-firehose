@@ -19,21 +19,20 @@ class PATDiversityTests(unittest.TestCase):
         topic = yaml.safe_load((cls.root/'github_actions_config/topics/perovskites.yaml').read_text(encoding='utf-8'))
         cls.policy = RelevancePolicy(topic['relevance'])
 
-    def test_accepts_cross_industry_vibration_measurement_and_diagnostics(self):
+    def test_accepts_acoustics_and_new_measurement_interests(self):
         for title in [
-            'Blade-tip vibration informed latent physics residual prognostics for fatigue crack growth and remaining useful life prediction',
-            'Effective vibration length identification and cable tension estimation based on UAV video',
-            'Vibration cyclostationarity analysis for wear characterization of cylinder liner-piston ring',
+            'Particle image velocimetry for flow field measurement in mixing processes',
+            'Embodied multimodal perception and reinforcement learning for robot manipulation',
             'Ultrasonic imaging modalities enabled by laser diffuse ultrasonic phased arrays',
         ]:
             with self.subTest(title=title):
                 self.assertIsNotNone(self.policy.evaluate({'title':title}))
         self.assertIsNone(self.policy.evaluate({'title':'Electromagnetic vibration energy harvester with displacement amplification mechanism'}))
 
-    def test_spectral_volume_does_not_hide_available_vibration_and_vision(self):
+    def test_spectral_volume_does_not_hide_computational_methods_and_vision(self):
         titles = ['In-line Raman PAT spectroscopy for pharmaceutical tablet quality monitoring']
         titles += [f'Calibration transfer in near-infrared spectroscopy method {i}' for i in range(20)]
-        titles += ['Vibration signal analysis for bearing fault diagnosis',
+        titles += ['Embodied multimodal perception and reinforcement learning for robot manipulation',
                    'Vibration and acoustic sensor fusion for equipment condition monitoring',
                    'Camera image analysis for industrial quality monitoring']
         rows=[{'id':str(i),'title':title,'link':'https://example.com/'+str(i),'rank_score':1-i/100} for i,title in enumerate(titles)]
@@ -41,7 +40,7 @@ class PATDiversityTests(unittest.TestCase):
         rows.sort(key=lambda row:(self.policy.evaluate(row)['priority'],row['rank_score']),reverse=True)
         chosen=self.select_rows(rows,self.policy)
         titles=[row['title'] for row in chosen]
-        self.assertIn('Vibration signal analysis for bearing fault diagnosis',titles)
+        self.assertIn('Embodied multimodal perception and reinforcement learning for robot manipulation',titles)
         self.assertIn('Camera image analysis for industrial quality monitoring',titles)
         self.assertLessEqual(sum('Calibration transfer' in title for title in titles),4)
         self.assertIn('pharmaceutical',chosen[0]['title'])
@@ -66,3 +65,4 @@ class PATDiversityTests(unittest.TestCase):
 
 if __name__=='__main__':
     unittest.main()
+

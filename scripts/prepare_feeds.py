@@ -9,6 +9,7 @@ from pathlib import Path
 import feedparser
 import requests
 import yaml
+from academic_sources import openalex_rss, conference_rss
 
 
 def europepmc_rss(value, days=180, get=requests.get):
@@ -54,8 +55,14 @@ def main():
     def fetch(item):
         key, value = item
         try:
-            is_search = value.get('kind') == 'europepmc'
-            if is_search:
+            kind = value.get('kind')
+            is_search = kind in ('europepmc','openalex','cvf','pmlr')
+            details = {}
+            if kind == 'openalex':
+                content, details = openalex_rss(value,int(cfg.get('defaults', {}).get('time_window_days',180)))
+            elif kind in ('cvf','pmlr'):
+                content, details = conference_rss(value,int(cfg.get('defaults', {}).get('time_window_days',180)),cache=data/'source-cache')
+            elif kind == 'europepmc':
                 content, hits = europepmc_rss(value, int(cfg.get('defaults', {}).get('time_window_days',180)))
             else:
                 response = requests.get(value["url"],timeout=(10,30),
@@ -68,7 +75,8 @@ def main():
             path = cache / (key + ".xml")
             path.write_bytes(content)
             result = {"key":key,"name":value["name"],"entries":len(feed.entries),"path":str(path.resolve())}
-            if is_search:
+            result.update(details)
+            if kind == 'europepmc':
                 result.update(search_hits=hits, truncated=hits>len(feed.entries))
             return result
         except Exception as exc:
@@ -91,5 +99,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 

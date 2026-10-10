@@ -63,10 +63,6 @@ feeds:
     name: Control Engineering Practice
     url: https://rss.sciencedirect.com/publication/science/09670661
     enabled: true
-  mechanical-signal:
-    name: Mechanical Systems and Signal Processing
-    url: https://rss.sciencedirect.com/publication/science/08883270
-    enabled: true
   food-control:
     name: Food Control
     url: https://rss.sciencedirect.com/publication/science/09567135
@@ -83,10 +79,83 @@ feeds:
     name: Europe PMC Pharmaceutical PAT
     url: https://www.ebi.ac.uk/europepmc/webservices/rest/search
     kind: europepmc
-    query: (TITLE_ABS:"process analytical technology" OR TITLE_ABS:"process analytical technologies" OR TITLE_ABS:"in-line
-      monitoring" OR TITLE_ABS:"online monitoring") AND (TITLE_ABS:pharmaceutical OR TITLE_ABS:granulation OR TITLE_ABS:"drug
-      manufacturing" OR TITLE_ABS:"tablet manufacturing")
+    query: (TITLE_ABS:"process analytical technology" OR TITLE_ABS:"process analytical
+      technologies" OR TITLE_ABS:"in-line monitoring" OR TITLE_ABS:"online monitoring")
+      AND (TITLE_ABS:pharmaceutical OR TITLE_ABS:granulation OR TITLE_ABS:"drug manufacturing"
+      OR TITLE_ABS:"tablet manufacturing")
     enabled: true
+  cvpr-official:
+    name: CVPR（主会，CVF 官方）
+    url: https://openaccess.thecvf.com/CVPR{year}?day=all
+    kind: cvf
+    month: 6
+    title_groups: &id001
+    - industrial|anomaly|defect|particle image|velocimetr|process control|time.series
+    - embodied|robot|manipulat|visuo.motor|reinforcement learn
+    - multi.modal|multimodal|cross.modal|sensor fusion
+    - domain adapt|few.shot|zero.shot|self.supervised
+    max_papers: 32
+    enabled: true
+  icml-official:
+    name: ICML（主会，PMLR 官方）
+    url: https://proceedings.mlr.press/
+    kind: pmlr
+    title_groups: *id001
+    max_papers: 32
+    enabled: true
+  cs-tpami:
+    name: IEEE TPAMI
+    url: https://api.openalex.org/works
+    kind: openalex
+    source_id: S199944782
+    query: '"anomaly detection" OR "defect detection" OR "multimodal" OR "sensor fusion"
+      OR "embodied" OR "robotic" OR "reinforcement learning" OR "process control"
+      OR "particle image velocimetry" OR "domain adaptation" OR "self-supervised"
+      OR "time series" OR "deep learning"'
+    enabled: true
+    issn: 0162-8828
+  cs-tip:
+    name: IEEE TIP
+    url: https://api.openalex.org/works
+    kind: openalex
+    source_id: S4210173141
+    query: '"anomaly detection" OR "defect detection" OR "multimodal" OR "sensor fusion"
+      OR "embodied" OR "robotic" OR "reinforcement learning" OR "process control"
+      OR "particle image velocimetry" OR "domain adaptation" OR "self-supervised"
+      OR "time series" OR "deep learning"'
+    enabled: true
+    issn: 1057-7149
+  cs-tnnls:
+    name: IEEE TNNLS
+    url: https://api.openalex.org/works
+    kind: openalex
+    source_id: S4210175523
+    query: '"anomaly detection" OR "defect detection" OR "multimodal" OR "sensor fusion"
+      OR "embodied" OR "robotic" OR "reinforcement learning" OR "process control"
+      OR "particle image velocimetry" OR "domain adaptation" OR "self-supervised"
+      OR "time series" OR "deep learning"'
+    enabled: true
+    issn: 2162-237X
+  cs-information-fusion:
+    name: Information Fusion
+    url: https://api.openalex.org/works
+    kind: openalex
+    source_id: S7560371
+    query: '"anomaly detection" OR "defect detection" OR "multimodal" OR "sensor fusion"
+      OR "embodied" OR "robotic" OR "reinforcement learning" OR "process control"
+      OR "particle image velocimetry" OR "domain adaptation" OR "self-supervised"
+      OR "time series" OR "deep learning"'
+    enabled: true
+    issn: 1566-2535
+  piv-fluid-methods:
+    name: Experiments in Fluids · PIV 方法
+    url: https://api.openalex.org/works
+    kind: openalex
+    source_id: S138356703
+    query: '"particle image velocimetry" OR "particle tracking velocimetry" OR "deep
+      learning" OR "flow measurement"'
+    enabled: true
+    issn: 0723-4864
 priority_journals: []
 priority_journal_boost: 0.0
 defaults:
@@ -98,4 +167,3 @@ defaults:
     rps: 1.0
     max_retries: 3
     mailto: ''
-
