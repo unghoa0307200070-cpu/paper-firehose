@@ -30,7 +30,7 @@ class PATDiversityTests(unittest.TestCase):
         self.assertIsNone(self.policy.evaluate({'title':'Electromagnetic vibration energy harvester with displacement amplification mechanism'}))
 
     def test_spectral_volume_does_not_hide_computational_methods_and_vision(self):
-        titles = ['In-line Raman PAT spectroscopy for pharmaceutical tablet quality monitoring']
+        titles = ['In-line FTIR PAT spectroscopy for pharmaceutical tablet quality monitoring']
         titles += [f'Calibration transfer in near-infrared spectroscopy method {i}' for i in range(20)]
         titles += ['Embodied multimodal perception and reinforcement learning for robot manipulation',
                    'Vibration and acoustic sensor fusion for equipment condition monitoring',
@@ -61,6 +61,37 @@ class PATDiversityTests(unittest.TestCase):
         self.assertIn('vibration',entry.summary)
         self.assertEqual(entry.link,'https://doi.org/10.1234/test')
         self.assertEqual(entry.published_parsed.tm_year,2026)
+
+    def test_vision_and_piv_slots_survive_large_pharma_and_spectra_pools(self):
+        from build_digest import focused_mode
+        titles = ['Process analytical technology for pharmaceutical tablet manufacturing quality monitoring'] * 30
+        titles += ['In-line FTIR PAT spectroscopy for pharmaceutical tablet quality monitoring'] * 30
+        titles += [f'Machine vision and deep learning for industrial defect detection method {i}' for i in range(9)]
+        titles += [f'Particle image velocimetry for mixing flow field measurement method {i}' for i in range(5)]
+        rows=[{'id':str(i),'title':t,'link':f'https://example.com/{i}','rank_score':.9-i/1000} for i,t in enumerate(titles)]
+        chosen=self.select_rows(rows,self.policy)
+        self.assertEqual(len(chosen),15)
+        self.assertGreaterEqual(sum(focused_mode(row,self.policy,'视觉') for row in chosen),6)
+        self.assertGreaterEqual(sum(focused_mode(row,self.policy,'PIV／流场测量') for row in chosen),3)
+        self.assertGreaterEqual(sum(self.policy.evaluate(row)['priority']>=4 for row in chosen),4)
+        self.assertLessEqual(sum('FTIR' in row['title'] for row in chosen),2)
+
+    def test_raman_titles_are_excluded_even_when_direct_pat(self):
+        for title in ['Raman process analytical technology for pharmaceutical tablet manufacturing',
+                      'Multimodal Raman and machine vision for pharmaceutical granulation monitoring',
+                      '拉曼光谱用于制药过程分析']:
+            with self.subTest(title=title):
+                self.assertIsNone(self.policy.evaluate({'title':title}))
+        self.assertIsNotNone(self.policy.evaluate({'title':'Process analytical technology for pharmaceutical granulation with near-infrared and vibration sensor fusion'}))
+
+    def test_missing_target_candidates_are_not_fabricated_or_counted_from_abstract(self):
+        rows=[{'id':'1','title':'In-line FTIR PAT spectroscopy for pharmaceutical tablet quality monitoring',
+               'summary':'Prior reviews also discuss machine vision and PIV.', 'link':'https://example.com/1'}]
+        from build_digest import focused_mode
+        chosen=self.select_rows(rows,self.policy)
+        self.assertEqual(len(chosen),1)
+        self.assertFalse(focused_mode(chosen[0],self.policy,'视觉'))
+        self.assertFalse(focused_mode(chosen[0],self.policy,'PIV／流场测量'))
 
 
 if __name__=='__main__':

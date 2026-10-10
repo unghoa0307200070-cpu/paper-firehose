@@ -28,14 +28,14 @@ class ComputationalMethodTests(unittest.TestCase):
             with self.subTest(title=title):self.assertIsNotNone(self.policy.evaluate({'title':title}))
         self.assertIsNone(self.policy.evaluate({'title':'Vibration signal analysis for bearing fault diagnosis'}))
         self.assertIsNone(self.policy.evaluate({'title':'Near-infrared calibration transfer'}))
-        self.assertIsNotNone(self.policy.evaluate({'title':'Process analytical technology for granulation with Raman, near-infrared and vibration sensor fusion'}))
+        self.assertIsNotNone(self.policy.evaluate({'title':'Process analytical technology for granulation with near-infrared and vibration sensor fusion'}))
         self.assertNotIn('振动',self.policy.config['modalities'])
         self.assertNotIn('振动',self.policy.config['modality_targets'])
         self.assertNotIn('near.infrared',self.topic['filter']['pattern'])
         self.assertNotIn('vibration',self.topic['ranking']['query'])
 
     def test_methods_have_space_when_many_pharma_papers_exist(self):
-        rows=[{'id':str(i),'title':'In-line Raman PAT spectroscopy for pharmaceutical tablet quality monitoring','rank_score':.8,'link':'https://example.com/'+str(i)} for i in range(20)]
+        rows=[{'id':str(i),'title':'Process analytical technology for pharmaceutical tablet manufacturing quality monitoring','rank_score':.8,'link':'https://example.com/'+str(i)} for i in range(20)]
         for i in range(3):rows.append({'id':'cs'+str(i),'title':'Self-supervised multimodal representation learning with missing modalities','rank_score':.3,'link':'https://example.com/cs'+str(i),'feed_name':'IEEE TPAMI'})
         chosen=select_rows(rows,self.policy)
         self.assertEqual(len(chosen),15)

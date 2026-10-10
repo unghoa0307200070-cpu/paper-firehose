@@ -31,8 +31,8 @@ class MultimodalRelevanceTests(unittest.TestCase):
             'In-line NIR spectroscopy for pharmaceutical tablet content uniformity monitoring',
             'Real-time acoustic emission and vibration monitoring of fluidized-bed granulation',
             'Camera bubble and foam size measurement in gelatin production',
-            'Multimodal Raman and machine vision process analytical technology for granulation',
-            'TabNet versus chemometrics in NIR and Raman spectroscopy: Robustness and interpretability',
+            'Multimodal OCT and machine vision process analytical technology for granulation',
+            'TabNet versus chemometrics in NIR and FTIR spectroscopy: Robustness and interpretability',
             'Antifogging coatings for optical windows in humid environments',
         ]
         for title in titles:
@@ -45,7 +45,7 @@ class MultimodalRelevanceTests(unittest.TestCase):
         self.assertIsNone(self.policy.evaluate(dict(title='Near infrared nanoprobe imaging', summary=citation)))
 
     def test_direct_process_detection_has_priority_over_generic_methods(self):
-        direct = self.policy.evaluate(dict(title='Raman sensor data fusion for tablet content uniformity detection'))
+        direct = self.policy.evaluate(dict(title='Machine vision sensor data fusion for tablet content uniformity detection'))
         generic = self.policy.evaluate(dict(title='Calibration transfer in near infrared spectroscopy'))
         self.assertGreater(direct['priority'], generic['priority'])
         self.assertGreater(direct['boost'], generic['boost'])
@@ -53,3 +53,4 @@ class MultimodalRelevanceTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+

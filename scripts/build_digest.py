@@ -24,11 +24,24 @@ def read_rows(path, table):
         return [dict(row) for row in db.execute(f"SELECT * FROM {table}")]
 
 
+def focused_mode(row, policy, modality):
+    """Count title-focused methods, separating PIV from other visual inspection."""
+    patterns = dict(policy.modalities)
+    title = clean(row.get('title'))
+    pattern = patterns.get(modality)
+    if not pattern or not pattern.search(title):
+        return False
+    if modality == '视觉' and patterns.get('PIV／流场测量') and patterns['PIV／流场测量'].search(title):
+        return False
+    return True
+
+
 def select_rows(candidates, policy, total=15):
-    """Keep pharmaceutical papers first, then represent available sensing modes."""
+    """Reserve relevant vision/PIV methods without allowing spectra to fill the page."""
+    candidates = [row for row in candidates if policy.evaluate(row)]
     rows, used, seen = [], Counter(), set()
     limits = policy.config.get('display_limits', {})
-    spectral_limit = int(policy.config.get('spectral_transfer_limit', total))
+    spectral_limit = int(policy.config.get('spectral_only_limit', policy.config.get('spectral_transfer_limit', total)))
     spectral_only = 0
     def add(row):
         nonlocal spectral_only
@@ -38,7 +51,7 @@ def select_rows(candidates, policy, total=15):
             return False
         priority = result['priority']
         modalities = set(result['modalities'])
-        only_spectral = priority < 4 and '光谱' in modalities and not modalities.intersection({'声学／超声','视觉','PIV／流场测量'})
+        only_spectral = '光谱' in modalities and not any(focused_mode(row,policy,mode) for mode in ['声学／超声','视觉','PIV／流场测量','融合'])
         if used[priority] >= int(limits.get(priority,total)) or (only_spectral and spectral_only >= spectral_limit):
             return False
         rows.append(row)
@@ -47,9 +60,22 @@ def select_rows(candidates, policy, total=15):
         spectral_only += int(only_spectral)
         return True
     for row in candidates:
-        if policy.evaluate(row)['priority'] >= 4 and len(rows) < min(8,total):
+        if policy.evaluate(row)['priority'] >= 4 and len(rows) < min(int(policy.config.get('pharma_target',4)),total):
             add(row)
-    # Keep relevant computer methods visible alongside pharmaceutical PAT.
+    # Targets apply only when actual relevant candidates exist; never invent entries.
+    targets=policy.config.get('modality_targets', {})
+    target_order=policy.config.get('modality_target_order', list(targets))
+    for modality in target_order:
+        target=targets.get(modality,0)
+        focused = [row for row in candidates if focused_mode(row,policy,modality)]
+        pool = focused or ([] if modality in ('视觉','PIV／流场测量') else [row for row in candidates if modality in policy.evaluate(row)['modalities']])
+        for row in pool:
+            # Prefer papers actually focused on the modality in their title.
+            count = sum(focused_mode(item,policy,modality) if focused else modality in policy.evaluate(item)['modalities'] for item in rows)
+            if count >= int(target):
+                break
+            add(row)
+    # Visual conference/journal methods can also satisfy this source-diversity target.
     cs_sources = set(policy.config.get('computational_sources',[]))
     def computational(row):
         return row.get('feed_name') in cs_sources or policy.evaluate(row)['label'].startswith('计算机方法')
@@ -57,21 +83,6 @@ def select_rows(candidates, policy, total=15):
         if sum(computational(item) for item in rows) >= int(policy.config.get('computational_target',0)):
             break
         if computational(row):
-            add(row)
-    # Targets apply only when actual relevant candidates exist; never invent entries.
-    mode_patterns = dict(policy.modalities)
-    targets=policy.config.get('modality_targets', {})
-    target_order=policy.config.get('modality_target_order', list(targets))
-    for modality in target_order:
-        target=targets.get(modality,0)
-        regex = mode_patterns.get(modality)
-        focused = [row for row in candidates if regex and regex.search(clean(row.get('title')))]
-        pool = focused or [row for row in candidates if modality in policy.evaluate(row)['modalities']]
-        for row in pool:
-            # Prefer papers actually focused on the modality in their title.
-            count = sum(bool(regex.search(clean(item.get('title')))) if focused else modality in policy.evaluate(item)['modalities'] for item in rows)
-            if count >= int(target):
-                break
             add(row)
     for row in candidates:
         add(row)
@@ -137,18 +148,19 @@ a{color:#165baf;text-decoration:none}a:hover{text-decoration:underline}
 <p>机器视觉 · 具身智能 · PIV · 多模态 · 过程控制与分析 · 深度学习 · 强化学习</p>
 <p class="meta">更新于：UPDATE（北京时间） · 本次新增 NEW 篇 · 近半年已收录 RECENT 篇</p>
 <p class="meta">文献范围：近 WINDOW 天（约半年）；同类论文相关性相近时优先较新的研究。</p>
+<p class="meta">本页重点推荐：机器视觉 VISION_COUNT 篇 · PIV PIV_COUNT 篇（两类分别计数）</p>
 <p class="meta">本页检测模态（同一论文可计入多项）：MODES</p>
-<div class="notice">NOTICE<br>AVAILABILITY FAILURE<br>来源范围以可获取的订阅条目和检索记录为准，并非近半年的全部文献。<br>补充 CVPR、ICML 官方主会论文及 TPAMI、TIP、TNNLS、Information Fusion 期刊方法。首页为相关计算机方法保留最多 3 个优先位置（有候选时），其余按制药与过程检测相关性筛选。单项检测技术也可入选；入选依据为规则命中，不代表适用性已经验证。arXiv 来源包含预印本；会议与期刊分别标注来源。振动、近红外不再作为主动偏好，与 PAT 或多模态方法高度相关时仍可入选。</div>
+<div class="notice">NOTICE<br>AVAILABILITY FAILURE<br>来源范围以可获取的订阅条目和检索记录为准，并非近半年的全部文献。<br>补充 CVPR、ICML 官方主会论文及 TPAMI、TIP、TNNLS、Information Fusion 期刊方法。首页优先安排 6 篇机器视觉和 3 篇 PIV 方法（有足够相关候选时，两类名额不重复计数），同时保留制药 PAT 文献；单纯光谱类最多 2 篇。单项检测技术也可入选；入选依据为规则命中，不代表适用性已经验证。arXiv 来源包含预印本；会议与期刊分别标注来源。不推荐以拉曼为主题的论文。振动、近红外不再作为主动偏好，与 PAT 或多模态方法高度相关时仍可入选。</div>
 CARDS<footer><a href="results_pharma_vision_ranked.html">查看本次全部候选（按相关性）</a> ·
 <a href="history_viewer_cards.html">查看历史文献</a><p>每天计划于北京时间 09:00 更新，实际运行可能延迟。显示论文原文摘要，不调用付费 AI 摘要接口。</p></footer></main></html>"""
-    replacements = {"WINDOW":str(days),"MODES":clean(" · ".join(f"{mode} {mode_counts.get(mode,0)} 篇" for mode in ['视觉','PIV／流场测量','融合','具身智能','深度学习','强化学习','光谱','声学／超声'])),"UPDATE":now.strftime("%Y-%m-%d %H:%M"),"NEW":str(len(current)),
+    replacements = {"VISION_COUNT":str(sum(focused_mode(row,policy,'视觉') for row in rows)),"PIV_COUNT":str(sum(focused_mode(row,policy,'PIV／流场测量') for row in rows)),"WINDOW":str(days),"MODES":clean(" · ".join(f"{mode} {mode_counts.get(mode,0)} 篇" for mode in ['视觉','PIV／流场测量','融合','具身智能','深度学习','强化学习','光谱','声学／超声'])),"UPDATE":now.strftime("%Y-%m-%d %H:%M"),"NEW":str(len(current)),
                     "RECENT":str(len(recent)), "NOTICE":notice,"AVAILABILITY":availability,
                     "FAILURE":clean(failure_text),"CARDS":"".join(cards)}
     for key, value in replacements.items():
         content = content.replace(key, value)
     site.mkdir(parents=True, exist_ok=True)
     (site / "index.html").write_text(content,encoding="utf-8")
-    result = {"profile":"pharma-pat-computational-v4","computational_displayed":sum(row.get("feed_name") in policy.config.get("computational_sources",[]) or policy.evaluate(row)["label"].startswith("计算机方法") for row in rows),"publication_window_days":days,"recency_weight":weight,"modalities":dict(mode_counts),"pharma_process_displayed":sum(policy.evaluate(row)['priority']>=4 for row in rows),"new_matches":len(current),"recent_matches":len(recent),"displayed":len(rows),
+    result = {"profile":"pharma-pat-vision-piv-v5","vision_focused_displayed":sum(focused_mode(row,policy,"视觉") for row in rows),"piv_focused_displayed":sum(focused_mode(row,policy,"PIV／流场测量") for row in rows),"computational_displayed":sum(row.get("feed_name") in policy.config.get("computational_sources",[]) or policy.evaluate(row)["label"].startswith("计算机方法") for row in rows),"publication_window_days":days,"recency_weight":weight,"modalities":dict(mode_counts),"pharma_process_displayed":sum(policy.evaluate(row)['priority']>=4 for row in rows),"new_matches":len(current),"recent_matches":len(recent),"displayed":len(rows),
               "sources":len(statuses),"failed_sources":failed}
     (site / "digest-status.json").write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding="utf-8")
     print(json.dumps(result,ensure_ascii=False),flush=True)

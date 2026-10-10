@@ -24,7 +24,7 @@ class PaperRecencyTests(unittest.TestCase):
         cls.today=dt.date(2026,10,8)
 
     def paper(self,age,score=0.5):
-        return {'title':'In-line Raman PAT spectroscopy for pharmaceutical tablet quality monitoring',
+        return {'title':'In-line FTIR PAT spectroscopy for pharmaceutical tablet quality monitoring',
                 'published_date':str(self.today-dt.timedelta(days=age)),'rank_score':score}
 
     def test_half_year_boundary_and_unknown_date(self):
